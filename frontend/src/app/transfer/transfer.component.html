@@ -1,0 +1,363 @@
+<div class="page-wrapper">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <h1>FinSwift</h1>
+      <p>Fast and secure financing</p>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-content">
+      <button class="back-btn" (click)="goBack()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back to Dashboard</span>
+      </button>
+      <h2 class="page-title">Transfer Money</h2>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="transfer-container">
+    <!-- Transfer Form -->
+    <div class="transfer-card" *ngIf="!receiptVisible">
+      <div class="card-header">
+        <h2>New Transfer</h2>
+        <p class="subtitle">Send money to another account securely</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <!-- To Account -->
+        <div class="form-group" [ngClass]="{ 'has-error': isControlInvalid('toAccountId') }">
+          <label for="toAccountId">
+            <span class="label-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </span>
+            To Account ID *
+          </label>
+          <input
+            id="toAccountId"
+            type="text"
+            formControlName="toAccountId"
+            placeholder="e.g., ACC1234"
+            maxlength="7"
+          />
+          <div class="error" *ngIf="toAccountId.hasError('required') && (toAccountId.touched || toAccountId.dirty)">
+            <span class="error-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </span>
+            <span>Account ID is required</span>
+          </div>
+          <div class="error" *ngIf="toAccountId.hasError('invalidAccountId') && (toAccountId.touched || toAccountId.dirty)">
+            <span class="error-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </span>
+            <span>Account ID must be in format ACC followed by 4 digits (e.g., ACC1234)</span>
+          </div>
+        </div>
+    
+        <!-- Amount -->
+        <div class="form-group" [ngClass]="{ 'has-error': isControlInvalid('amount') }">
+          <label for="amount">
+            <span class="label-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </span>
+            Amount *
+          </label>
+          <div class="input-with-currency">
+            <span class="currency-symbol">₹</span>
+            <input
+              id="amount"
+              type="number"
+              formControlName="amount"
+              placeholder="0.00"
+              min="0.01"
+              step="0.01"
+            />
+          </div>
+          <div class="error" *ngIf="amount.hasError('required') && (amount.touched || amount.dirty)">
+            <span class="error-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </span>
+            <span>Amount is required</span>
+          </div>
+          <div class="error" *ngIf="amount.hasError('min') && (amount.touched || amount.dirty)">
+            <span class="error-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </span>
+            <span>Amount must be greater than ₹0</span>
+          </div>
+        </div>
+    
+        <!-- Category -->
+        <div class="form-group" [ngClass]="{ 'has-error': isControlInvalid('category') }">
+          <label for="category">
+            <span class="label-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </span>
+            Category *
+          </label>
+          <select id="category" formControlName="category">
+            <option *ngFor="let cat of categories" [value]="cat.value">
+              {{ cat.label }}
+            </option>
+          </select>
+          <div class="error" *ngIf="isControlInvalid('category')">
+            <span class="error-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </span>
+            <span>Please select a category</span>
+          </div>
+        </div>
+    
+        <!-- Note -->
+        <div class="form-group">
+          <label for="note">
+            <span class="label-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </span>
+            Note (Optional)
+          </label>
+          <textarea
+            id="note"
+            rows="3"
+            formControlName="note"
+            placeholder="Add a short note about this transfer"
+          ></textarea>
+        </div>
+    
+        <button type="submit" class="submit-btn" [disabled]="isSubmitDisabled()">
+          <span *ngIf="!submitting">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+            Transfer Money
+          </span>
+          <span *ngIf="submitting">
+            <span class="spinner"></span> Processing...
+          </span>
+        </button>
+
+        <!-- Global server messages -->
+        <div class="message-container">
+          <p class="server-error" *ngIf="serverErrorMessage">
+            <span class="error-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            </span>
+            <span>{{ serverErrorMessage }}</span>
+          </p>
+        </div>
+      </form>
+    </div>
+
+    <!-- Receipt View -->
+    <div class="transfer-card receipt-card"
+         [ngClass]="{ 'success': receiptData?.status === 'SUCCESS',
+                      'failed': receiptData?.status === 'FAILED' }"
+         *ngIf="receiptVisible && receiptData">
+      
+      <!-- Success Header -->
+      <div class="receipt-header" *ngIf="receiptData.status === 'SUCCESS'">
+        <div class="success-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h2>Transfer Successful!</h2>
+        <p class="receipt-subtitle">Your money has been transferred securely</p>
+      </div>
+
+      <!-- Failed Header -->
+      <div class="receipt-header failed-header" *ngIf="receiptData.status === 'FAILED'">
+        <div class="failed-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+        </div>
+        <h2>Transfer Failed</h2>
+        <p class="receipt-subtitle">Your transfer could not be completed</p>
+      </div>
+
+      <!-- Amount Display -->
+      <div class="amount-display" [ngClass]="{ 'failed-amount': receiptData.status === 'FAILED' }">
+        <div class="amount-label">{{ receiptData.status === 'SUCCESS' ? 'Amount Transferred' : 'Amount Attempted' }}</div>
+        <div class="amount-value">₹{{ receiptData.amount | number : '1.2-2' }}</div>
+      </div>
+
+      <div class="receipt-body">
+        <div class="receipt-section">
+          <div class="section-title">Transfer Details</div>
+          
+          <div class="receipt-row">
+            <span class="label">
+              <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <polyline points="5 12 12 5 19 12"></polyline>
+                </svg>
+              </span>
+              From Account
+            </span>
+            <span class="value">
+              <div class="account-info">
+                <div class="account-name">{{ receiptData.fromAccountHolderName }}</div>
+                <div class="account-number">{{ receiptData.fromAccountId }}</div>
+              </div>
+            </span>
+          </div>
+
+          <div class="receipt-row">
+            <span class="label">
+              <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <polyline points="19 12 12 19 5 12"></polyline>
+                </svg>
+              </span>
+              To Account
+            </span>
+            <span class="value">
+              <div class="account-info">
+                <div class="account-name">{{ receiptData.toAccountHolderName }}</div>
+                <div class="account-number">{{ receiptData.toAccountId }}</div>
+              </div>
+            </span>
+          </div>
+
+          <div class="receipt-row">
+            <span class="label">
+              <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </span>
+              Category
+            </span>
+            <span class="value">{{ receiptData.category || 'N/A' }}</span>
+          </div>
+
+          <div class="receipt-row">
+            <span class="label">
+              <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </span>
+              Note
+            </span>
+            <span class="value">{{ receiptData.note || '-' }}</span>
+          </div>
+        </div>
+
+        <div class="receipt-section">
+          <div class="section-title">Transaction Info</div>
+          
+          <div class="receipt-row">
+            <span class="label">
+              <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+              </span>
+              Status
+            </span>
+            <span class="value">
+              <span class="status-badge" 
+                    [ngClass]="{ 'success': receiptData.status === 'SUCCESS',
+                                 'failed': receiptData.status === 'FAILED' }">
+                {{ receiptData.status }}
+              </span>
+            </span>
+          </div>
+
+          <div class="receipt-row" *ngIf="receiptData.failureReason">
+            <span class="label">
+              <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              </span>
+              Reason
+            </span>
+            <span class="value failure-reason">{{ receiptData.failureReason }}</span>
+          </div>
+
+          <div class="receipt-row">
+            <span class="label">
+              <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </span>
+              Date & Time
+            </span>
+            <span class="value">
+              {{ receiptData.createdOn | date : 'medium' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="receipt-footer">
+        <div class="timer-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Returning to transfer in <strong>{{ countdownSeconds }}</strong> seconds</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>&copy; 2026 FinSwift. All rights reserved.</p>
+  </footer>
+</div>

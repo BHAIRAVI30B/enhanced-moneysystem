@@ -1,0 +1,311 @@
+<div class="page-wrapper">
+  <!-- Application Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <h1>FinSwift</h1>
+      <p>Fast and secure financing</p>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-content">
+      <button class="back-btn" (click)="goBack()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back to Dashboard</span>
+      </button>
+      <h2 class="page-title">Search Transactions</h2>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="search-transactions-page">
+    <div class="page-content">
+      <!-- Search Card -->
+      <div class="search-card">
+        <div class="search-label">Enter Account ID</div>
+        <div class="search-input-wrapper">
+          <input 
+            [(ngModel)]="accountId" 
+            type="text"
+            placeholder="Account ID" 
+            class="search-input"
+            (keyup.enter)="searchTransactions()"
+          />
+          <button class="search-button" (click)="searchTransactions()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <span>Search</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-tabs" *ngIf="transactions.length > 0">
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'all'" 
+          (click)="setTab('all')">
+          <span>All</span>
+          <span class="tab-count">{{ transactions.length }}</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'outgoing'" 
+          (click)="setTab('outgoing')">
+          <span>Outgoing</span>
+          <span class="tab-count">{{ outgoing.length }}</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'incoming'" 
+          (click)="setTab('incoming')">
+          <span>Incoming</span>
+          <span class="tab-count">{{ incoming.length }}</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'failed'" 
+          (click)="setTab('failed')">
+          <span>Failed</span>
+          <span class="tab-count">{{ failed.length }}</span>
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading transactions...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error && !loading" class="error-state">
+        <div class="error-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <p class="error-message">{{ error }}</p>
+      </div>
+
+      <!-- All Transactions -->
+      <div *ngIf="activeTab === 'all' && !loading && !error" class="transactions-list">
+        <div *ngFor="let tx of transactions; let i = index"
+             class="transaction-card"
+             [ngClass]="{
+               'incoming': tx.toAccountId === accountId && tx.status === 'SUCCESS',
+               'outgoing': tx.fromAccountId === accountId && tx.status === 'SUCCESS',
+               'failed': tx.status === 'FAILED'
+             }">
+
+          <div class="transaction-icon">
+            <svg *ngIf="tx.toAccountId === accountId && tx.status === 'SUCCESS'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14M19 12l-7 7-7-7"/>
+            </svg>
+            <svg *ngIf="tx.fromAccountId === accountId && tx.status === 'SUCCESS'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 19V5M5 12l7-7 7 7"/>
+            </svg>
+            <svg *ngIf="tx.status === 'FAILED'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+          </div>
+
+          <div class="transaction-details">
+            <div class="transaction-header">
+              <div class="transaction-description">
+                <span *ngIf="tx.fromAccountId === accountId && tx.status === 'SUCCESS'" class="transaction-title">
+                  Sent to {{ tx.toAccountHolderName }}
+                </span>
+                <span *ngIf="tx.toAccountId === accountId && tx.status === 'SUCCESS'" class="transaction-title">
+                  Received from {{ tx.fromAccountHolderName }}
+                </span>
+                <span *ngIf="tx.status === 'FAILED'" class="transaction-title">
+                  Failed Transaction
+                </span>
+                <span class="transaction-account">
+                  <span *ngIf="tx.fromAccountId === accountId && tx.status === 'SUCCESS'">Account {{ tx.toAccountId }}</span>
+                  <span *ngIf="tx.toAccountId === accountId && tx.status === 'SUCCESS'">Account {{ tx.fromAccountId }}</span>
+                  <span *ngIf="tx.status === 'FAILED'">{{ tx.fromAccountHolderName }} → {{ tx.toAccountHolderName }}</span>
+                </span>
+              </div>
+              <div class="transaction-amount"
+                   [ngClass]="{
+                     'credit': tx.toAccountId === accountId && tx.status === 'SUCCESS',
+                     'debit': tx.fromAccountId === accountId && tx.status === 'SUCCESS',
+                     'failed-amount': tx.status === 'FAILED'
+                   }">
+                <span *ngIf="tx.status === 'SUCCESS'">{{ tx.fromAccountId === accountId ? '-' : '+'}}₹{{ tx.amount | number:'1.2-2' }}</span>
+                <span *ngIf="tx.status === 'FAILED'">₹{{ tx.amount | number:'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <div class="transaction-footer">
+              <div class="transaction-meta">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span class="timestamp">{{ tx.createdOn | date:'MMM d, y, h:mm a' }}</span>
+              </div>
+              <div class="transaction-status">
+                <span *ngIf="tx.status === 'SUCCESS'" class="status-badge success">Success</span>
+                <span *ngIf="tx.status === 'FAILED'" class="status-badge failed">Failed</span>
+              </div>
+            </div>
+
+            <div *ngIf="tx.status === 'FAILED' && tx.failureReason" class="failure-reason">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>{{ tx.failureReason }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Outgoing Transactions -->
+      <div *ngIf="activeTab === 'outgoing' && !loading && !error" class="transactions-list">
+        <div *ngFor="let tx of outgoing; let i = index" class="transaction-card outgoing">
+          <div class="transaction-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 19V5M5 12l7-7 7 7"/>
+            </svg>
+          </div>
+
+          <div class="transaction-details">
+            <div class="transaction-header">
+              <div class="transaction-description">
+                <span class="transaction-title">Sent to {{ tx.toAccountHolderName }}</span>
+                <span class="transaction-account">Account {{ tx.toAccountId }}</span>
+              </div>
+              <div class="transaction-amount debit">
+                -₹{{ tx.amount | number:'1.2-2' }}
+              </div>
+            </div>
+
+            <div class="transaction-footer">
+              <div class="transaction-meta">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span class="timestamp">{{ tx.createdOn | date:'MMM d, y, h:mm a' }}</span>
+              </div>
+              <div class="transaction-status">
+                <span class="status-badge success">Success</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Incoming Transactions -->
+      <div *ngIf="activeTab === 'incoming' && !loading && !error" class="transactions-list">
+        <div *ngFor="let tx of incoming; let i = index" class="transaction-card incoming">
+          <div class="transaction-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14M19 12l-7 7-7-7"/>
+            </svg>
+          </div>
+
+          <div class="transaction-details">
+            <div class="transaction-header">
+              <div class="transaction-description">
+                <span class="transaction-title">Received from {{ tx.fromAccountHolderName }}</span>
+                <span class="transaction-account">Account {{ tx.fromAccountId }}</span>
+              </div>
+              <div class="transaction-amount credit">
+                +₹{{ tx.amount | number:'1.2-2' }}
+              </div>
+            </div>
+
+            <div class="transaction-footer">
+              <div class="transaction-meta">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span class="timestamp">{{ tx.createdOn | date:'MMM d, y, h:mm a' }}</span>
+              </div>
+              <div class="transaction-status">
+                <span class="status-badge success">Success</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Failed Transactions -->
+      <div *ngIf="activeTab === 'failed' && !loading && !error" class="transactions-list">
+        <div *ngFor="let tx of failed; let i = index" class="transaction-card failed">
+          <div class="transaction-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+          </div>
+
+          <div class="transaction-details">
+            <div class="transaction-header">
+              <div class="transaction-description">
+                <span class="transaction-title">Failed Transaction</span>
+                <span class="transaction-account">{{ tx.fromAccountHolderName }} → {{ tx.toAccountHolderName }}</span>
+              </div>
+              <div class="transaction-amount failed-amount">
+                ₹{{ tx.amount | number:'1.2-2' }}
+              </div>
+            </div>
+
+            <div class="transaction-footer">
+              <div class="transaction-meta">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span class="timestamp">{{ tx.createdOn | date:'MMM d, y, h:mm a' }}</span>
+              </div>
+              <div class="transaction-status">
+                <span class="status-badge failed">Failed</span>
+              </div>
+            </div>
+
+            <div *ngIf="tx.failureReason" class="failure-reason">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>{{ tx.failureReason }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="transactions.length === 0 && !loading && !error" class="empty-state">
+        <div class="empty-icon">
+          <div style="font-size: 64px; font-weight: 600; color: currentColor;">₹</div>
+        </div>
+        <p class="empty-title">No Transactions Found</p>
+        <p class="empty-description">Enter an account ID to search for transactions</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>&copy; 2026 FinSwift. All rights reserved.</p>
+  </footer>
+</div>
