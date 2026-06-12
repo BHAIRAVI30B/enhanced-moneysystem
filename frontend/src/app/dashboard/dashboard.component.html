@@ -9,7 +9,6 @@
 
   <!-- Dashboard Content -->
   <main class="dashboard">
-    <!-- Main Content -->
     <div class="dashboard-content">
       <ng-container *ngIf="role === 'ROLE_ADMIN'; else userView">
         <!-- Admin View -->
@@ -29,15 +28,12 @@
                 {{ username }}
               </div>
             </div>
-
             <div class="balance-card admin-card">
               <div class="label">Admin Dashboard</div>
               <div class="role-text">{{ role }}</div>
             </div>
           </div>
-
           <div class="right-section">
-            <!-- Admin Options -->
             <div class="options">
               <div class="card" (click)="goTo('/search-account')">
                 <div class="card-icon-wrapper">
@@ -52,8 +48,6 @@
                 <p>Search Transactions</p>
               </div>
             </div>
-
-            <!-- Admin Logout Button -->
             <button class="logout-btn" (click)="logout()">
               <svg class="logout-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -82,7 +76,6 @@
                 {{ account?.holderName }}
               </div>
             </div>
-
             <div class="balance-card">
               <div class="label">Available Balance</div>
               <div class="amount">{{ account?.balance | currency:'INR':'symbol':'1.2-2' }}</div>
@@ -91,7 +84,7 @@
           </div>
 
           <div class="right-section">
-            <!-- User Options -->
+            <!-- 4 option cards -->
             <div class="options">
               <div class="card" (click)="goTo('/transfer')">
                 <div class="card-icon-wrapper">
@@ -111,20 +104,33 @@
                 </div>
                 <p>My Details</p>
               </div>
-              <div class="card logout-card" (click)="logout()">
-                <div class="card-icon-wrapper">
-                  <img src="assets/logout.png" alt="Logout">
+              <!-- NEW: Rewards card -->
+              <div class="card rewards-card" (click)="goTo('/rewards')">
+                <div class="card-icon-wrapper rewards-icon-wrapper">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="6"></circle>
+                    <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path>
+                  </svg>
                 </div>
-                <p>Logout</p>
+                <p>My Rewards</p>
               </div>
             </div>
+
+            <!-- NEW: Logout as rectangular bar below cards (same as admin) -->
+            <button class="logout-btn" (click)="logout()">
+              <svg class="logout-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       </ng-template>
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="app-footer">
     <p>&copy; 2026 FinSwift. All rights reserved.</p>
   </footer>

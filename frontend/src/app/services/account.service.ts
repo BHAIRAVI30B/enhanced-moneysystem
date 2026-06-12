@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Account } from '../models/account.model';
 import { TransactionResponse } from '../models/transaction-response.model';
+import { RewardResponse } from '../models/reward.model';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
@@ -13,12 +14,9 @@ export class AccountService {
 
   private getAuthHeaders(): HttpHeaders {
     const token = sessionStorage.getItem('jwt');
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
-  // USER endpoints
   getMyDetails(): Observable<Account> {
     return this.http.get<Account>(`${this.baseUrl}/my-details`, { headers: this.getAuthHeaders() });
   }
@@ -31,11 +29,14 @@ export class AccountService {
     return this.http.get<TransactionResponse[]>(`${this.baseUrl}/my-transactions`, { headers: this.getAuthHeaders() });
   }
 
+  getMyRewards(): Observable<RewardResponse> {
+    return this.http.get<RewardResponse>(`${this.baseUrl}/my-rewards`, { headers: this.getAuthHeaders() });
+  }
+
   transferAsUser(request: any): Observable<TransactionResponse> {
     return this.http.post<TransactionResponse>(`${this.transferUrl}/user`, request, { headers: this.getAuthHeaders() });
   }
 
-  // ADMIN endpoints
   getAccountById(id: string): Observable<Account> {
     return this.http.get<Account>(`${this.baseUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
@@ -44,3 +45,4 @@ export class AccountService {
     return this.http.get<TransactionResponse[]>(`${this.baseUrl}/${id}/transactions`, { headers: this.getAuthHeaders() });
   }
 }
+

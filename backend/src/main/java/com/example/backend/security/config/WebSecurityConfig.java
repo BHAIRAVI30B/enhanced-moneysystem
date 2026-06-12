@@ -103,6 +103,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/v1/accounts/my-details").hasRole(ROLE_USER)
                         .requestMatchers("/api/v1/accounts/balance").hasRole(ROLE_USER)
                         .requestMatchers("/api/v1/accounts/my-transactions").hasRole(ROLE_USER)
+                        .requestMatchers("/api/v1/accounts/my-rewards").hasRole(ROLE_USER)
                         .requestMatchers("/api/v1/transfers/user").hasRole(ROLE_USER)
                         .requestMatchers("/api/test/user").hasRole(ROLE_USER)
 
