@@ -328,6 +328,14 @@ input:hover,
 select:hover,
 textarea:hover {
   border-color: #cbd5e1;
+}
+
+.field-hint {
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  color: #64748b;
+  line-height: 1.4;
+}
   background: #f1f5f9;
 }
 
@@ -402,6 +410,7 @@ select:focus {
     0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
+.form-group.has-error .label-icon,
 .form-group.has-error .label-icon svg {
   color: #ef4444;
 }

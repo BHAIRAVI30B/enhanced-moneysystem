@@ -42,9 +42,9 @@ export class TransferComponent {
   constructor(private fb: FormBuilder, private transferService: TransferService, private router: Router) {
     this.form = this.fb.group({
       toAccountId: ['', [Validators.required, this.accountIdValidator]],
-      amount: [null, [Validators.required, Validators.min(0.01)]],
+      amount: [null, [Validators.required, Validators.min(0.01), this.amountPrecisionValidator]],
       category: ['RENT', [Validators.required]],
-      note: [''],
+      note: ['', [Validators.maxLength(300)]],
     });
   }
 
@@ -55,6 +55,35 @@ export class TransferComponent {
     }
     const pattern = /^ACC\d{4}$/;
     return pattern.test(control.value) ? null : { invalidAccountId: true };
+  }
+
+  private amountPrecisionValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const valueString = String(value);
+    const decimalPart = valueString.split('.')[1];
+    if (decimalPart && decimalPart.length > 2) {
+      return { decimalPlaces: true };
+    }
+
+    return null;
+  }
+
+  onAmountInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.value.includes('.')) {
+      return;
+    }
+
+    const [whole, fraction] = input.value.split('.');
+    if (fraction.length > 2) {
+      const truncated = `${whole}.${fraction.slice(0, 2)}`;
+      input.value = truncated;
+      this.form.get('amount')?.setValue(Number(truncated), { emitEvent: false });
+    }
   }
 
   goBack(): void {

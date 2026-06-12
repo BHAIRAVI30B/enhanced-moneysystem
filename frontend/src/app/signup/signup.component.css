@@ -407,6 +407,31 @@ label {
   font-size: 1.1rem;
 }
 
+.toggle-password-btn {
+  position: absolute;
+  right: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.toggle-password-btn:hover {
+  color: #3b82f6;
+}
+
+.toggle-password-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
 /* Success Icon */
 .success-icon {
   position: absolute;
