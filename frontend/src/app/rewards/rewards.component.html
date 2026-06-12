@@ -1,0 +1,108 @@
+<div class="page-wrapper">
+  <header class="app-header">
+    <div class="header-content">
+      <h1>FinSwift</h1>
+      <p>Fast and secure financing</p>
+    </div>
+  </header>
+
+  <main class="rewards-main">
+    <div class="rewards-content">
+
+      <!-- Back Button -->
+      <button class="back-btn" (click)="goBack()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Dashboard
+      </button>
+
+      <!-- Loading -->
+      <div class="loading-card" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading your rewards...</p>
+      </div>
+
+      <!-- Error -->
+      <div class="error-card" *ngIf="error && !loading">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        {{ error }}
+      </div>
+
+      <ng-container *ngIf="!loading && !error && rewards">
+
+        <!-- Total Points Banner -->
+        <div class="points-banner">
+          <div class="medal-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="6"></circle>
+              <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path>
+            </svg>
+          </div>
+          <div class="points-info">
+            <div class="points-label">Total Reward Points</div>
+            <div class="points-value">{{ rewards.totalPoints }}</div>
+            <div class="points-sub">1 point earned per ₹100 transferred</div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-card" *ngIf="rewards.entries.length === 0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="6"></circle>
+            <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path>
+          </svg>
+          <h3>No rewards yet</h3>
+          <p>Transfer more than ₹100 to a different user to start earning reward points.</p>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="table-card" *ngIf="rewards.entries.length > 0">
+          <div class="table-header">
+            <h2>Reward Transactions</h2>
+            <span class="entry-count">{{ rewards.entries.length }} eligible transaction{{ rewards.entries.length !== 1 ? 's' : '' }}</span>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Transferred To</th>
+                  <th>Account ID</th>
+                  <th>Amount</th>
+                  <th>Points Earned</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let entry of rewards.entries">
+                  <td class="date-cell">{{ entry.createdOn | date:'dd MMM yyyy, h:mm a' }}</td>
+                  <td class="name-cell">{{ entry.toAccountHolderName }}</td>
+                  <td class="account-cell">{{ entry.toAccountId }}</td>
+                  <td class="amount-cell">{{ entry.amount | currency:'INR':'symbol':'1.2-2' }}</td>
+                  <td class="points-cell">
+                    <span class="points-badge">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="8" r="6"></circle>
+                        <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path>
+                      </svg>
+                      +{{ entry.points }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </ng-container>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <p>&copy; 2026 FinSwift. All rights reserved.</p>
+  </footer>
+</div>

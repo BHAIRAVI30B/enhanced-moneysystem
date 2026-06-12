@@ -1,6 +1,7 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.AccountDTO;
+import com.example.backend.dtos.RewardResponse;
 import com.example.backend.dtos.TransactionResponse;
 import com.example.backend.exceptions.AccountNotFoundException;
 import com.example.backend.security.service.UserDetailsImpl;
@@ -25,6 +26,7 @@ public class AccountController {
     private static final Logger logger = LoggerFactory.getLogger(AccountController.class);
 
     private final AccountService accountService;
+
     public AccountController(AccountService accountService) {
         this.accountService = accountService;
     }
@@ -40,7 +42,6 @@ public class AccountController {
     @GetMapping("/{id}/transactions")
     public ResponseEntity<List<TransactionResponse>> getTransactionsById(
             @PathVariable String id) throws AccountNotFoundException {
-
         List<TransactionResponse> transactions = accountService.getTransactions(id);
         return ResponseEntity.ok(transactions);
     }
@@ -48,20 +49,16 @@ public class AccountController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/my-details")
     public ResponseEntity<AccountDTO> getMyAccount() {
-
         UserDetailsImpl userDetails = getCurrentUser();
         AccountDTO account = accountService.getAccount(userDetails.getAccountId());
-
         return ResponseEntity.ok(account);
     }
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/balance")
     public ResponseEntity<Double> getMyBalance() {
-
         UserDetailsImpl userDetails = getCurrentUser();
         AccountDTO account = accountService.getAccount(userDetails.getAccountId());
-
         return ResponseEntity.ok(account.getBalance());
     }
 
@@ -69,12 +66,19 @@ public class AccountController {
     @GetMapping("/my-transactions")
     public ResponseEntity<List<TransactionResponse>> getMyTransactions()
             throws AccountNotFoundException {
-
         UserDetailsImpl userDetails = getCurrentUser();
         List<TransactionResponse> transactions =
                 accountService.getTransactions(userDetails.getAccountId());
-
         return ResponseEntity.ok(transactions);
+    }
+
+    // NEW: rewards endpoint
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/my-rewards")
+    public ResponseEntity<RewardResponse> getMyRewards() {
+        UserDetailsImpl userDetails = getCurrentUser();
+        RewardResponse rewards = accountService.getRewards(userDetails.getAccountId());
+        return ResponseEntity.ok(rewards);
     }
 
     private UserDetailsImpl getCurrentUser() {
