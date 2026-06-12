@@ -11,4 +11,5 @@ public interface AccountService {
     List<TransactionResponse> getTransactions(String id);
     String generateAccountId();
     RewardResponse getRewards(String accountId); // NEW
+    AccountDTO updateStatus(String accountId, String status); // NEW
 }

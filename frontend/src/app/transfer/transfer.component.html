@@ -17,7 +17,27 @@
         </svg>
         <span>Back to Dashboard</span>
       </button>
-      <h2 class="page-title">Transfer Money</h2>
+      <div class="title-group">
+        <h2 class="page-title">Transfer Money</h2>
+        <p class="page-subtitle">Send money securely to another FinSwift account</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Locked Account Modal -->
+  <div class="modal-overlay" *ngIf="showLockedModal">
+    <div class="modal-card">
+      <div class="modal-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <h3>Account Locked</h3>
+      <p>You cannot transfer money because your account is locked. Please contact the admin for more details.</p>
+      <div class="modal-actions">
+        <button class="modal-btn primary" (click)="closeLockedModal()">Okay</button>
+      </div>
     </div>
   </div>
 

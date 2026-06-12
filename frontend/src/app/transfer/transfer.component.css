@@ -68,28 +68,30 @@
 }
 
 .back-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 18px;
-  background: white;
-  border: 2px solid #3b82f6;
-  border-radius: 12px;
-  color: #3b82f6;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 14px;
+  padding: 12px 20px;
   font-size: 0.9375rem;
-  font-weight: 700;
+  font-weight: 600;
+  color: #334155;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   font-family: 'Inter', 'Segoe UI', 'Roboto', -apple-system, sans-serif;
   position: absolute;
   left: 2rem;
 }
 
 .back-btn:hover {
-  background: #eff6ff;
-  border-color: #2563eb;
-  color: #2563eb;
-  transform: translateX(-4px);
+  background: white;
+  transform: translateX(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #1e40af;
 }
 
 .back-btn svg {
@@ -104,6 +106,20 @@
   margin: 0;
   letter-spacing: -0.5px;
   text-align: center;
+}
+
+.title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 4px 0 0;
+  text-align: center;
+  font-weight: 500;
 }
 
 /* Transfer Container */
@@ -335,8 +351,6 @@ textarea:hover {
   font-size: 0.8125rem;
   color: #64748b;
   line-height: 1.4;
-}
-  background: #f1f5f9;
 }
 
 input:focus,
@@ -1181,4 +1195,79 @@ textarea:focus-visible {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+/* Locked Account Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-card h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.modal-card p {
+  font-size: 0.9375rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.modal-btn {
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', -apple-system, sans-serif;
+  border: 2px solid transparent;
+}
+
+.modal-btn.primary {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: white;
+}
+
+.modal-btn.primary:hover {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
 }

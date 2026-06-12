@@ -44,5 +44,8 @@ export class AccountService {
   getTransactionsById(id: string): Observable<TransactionResponse[]> {
     return this.http.get<TransactionResponse[]>(`${this.baseUrl}/${id}/transactions`, { headers: this.getAuthHeaders() });
   }
-}
 
+  updateAccountStatus(id: string, status: string): Observable<Account> {
+    return this.http.put<Account>(`${this.baseUrl}/${id}/status`, { status }, { headers: this.getAuthHeaders() });
+  }
+}

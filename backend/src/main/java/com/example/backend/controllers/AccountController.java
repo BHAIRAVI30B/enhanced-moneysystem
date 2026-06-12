@@ -46,6 +46,15 @@ public class AccountController {
         return ResponseEntity.ok(transactions);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/status")
+    public ResponseEntity<AccountDTO> updateAccountStatus(
+            @PathVariable String id,
+            @RequestBody com.example.backend.dtos.AccountStatusUpdateRequest request) {
+        AccountDTO account = accountService.updateStatus(id, request.getStatus());
+        return ResponseEntity.ok(account);
+    }
+
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/my-details")
     public ResponseEntity<AccountDTO> getMyAccount() {

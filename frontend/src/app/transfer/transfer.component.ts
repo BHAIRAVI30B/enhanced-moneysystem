@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TransferService } from '../services/transfer.service';
+import { AccountService } from '../services/account.service';
 import { TransactionResponse } from '../models/transaction-response.model';
 import { Router } from '@angular/router';
 
@@ -18,7 +19,7 @@ interface UiCategoryOption {
   templateUrl: './transfer.component.html',
   styleUrls: ['./transfer.component.css'],
 })
-export class TransferComponent {
+export class TransferComponent implements OnInit, OnDestroy {
   form: FormGroup;
   submitting = false;
   serverErrorMessage: string | null = null;
@@ -28,6 +29,9 @@ export class TransferComponent {
   receiptData: TransactionResponse | null = null;
   countdownSeconds = 0;
   private countdownTimer: any;
+
+  accountLocked = false;
+  showLockedModal = false;
 
   categories: UiCategoryOption[] = [
     { value: 'GROCERY', label: 'Grocery' },
@@ -39,13 +43,31 @@ export class TransferComponent {
     { value: 'OTHER', label: 'Other' },
   ];
 
-  constructor(private fb: FormBuilder, private transferService: TransferService, private router: Router) {
+  constructor(private fb: FormBuilder, private transferService: TransferService, private accountService: AccountService, private router: Router) {
     this.form = this.fb.group({
       toAccountId: ['', [Validators.required, this.accountIdValidator]],
       amount: [null, [Validators.required, Validators.min(0.01), this.amountPrecisionValidator]],
       category: ['RENT', [Validators.required]],
       note: ['', [Validators.maxLength(300)]],
     });
+  }
+
+  ngOnInit(): void {
+    this.accountService.getMyDetails().subscribe({
+      next: (account) => {
+        if (account.status === 'LOCKED') {
+          this.accountLocked = true;
+          this.showLockedModal = true;
+        }
+      },
+      error: () => {
+        // Silently ignore - status check is a soft safeguard only
+      }
+    });
+  }
+
+  closeLockedModal(): void {
+    this.showLockedModal = false;
   }
 
   // Custom validator for account ID format (ACC followed by 4 digits)
@@ -87,6 +109,13 @@ export class TransferComponent {
   }
 
   goBack(): void {
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
+    this.receiptVisible = false;
+    this.receiptData = null;
+    this.countdownSeconds = 0;
     this.router.navigate(['/dashboard']);
   }
 
@@ -100,6 +129,11 @@ export class TransferComponent {
   }
 
   onSubmit(): void {
+    if (this.accountLocked) {
+      this.showLockedModal = true;
+      return;
+    }
+
     if (this.form.invalid || this.submitting) {
       this.form.markAllAsTouched();
       return;
@@ -169,6 +203,13 @@ export class TransferComponent {
   }
 
   isSubmitDisabled(): boolean {
-    return this.form.invalid || this.submitting;
+    return this.form.invalid || this.submitting || this.accountLocked;
+  }
+
+  ngOnDestroy(): void {
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
   }
 }

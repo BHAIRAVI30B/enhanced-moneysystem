@@ -5,9 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
@@ -47,5 +49,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-}
+    @ExceptionHandler(InvalidAccountStatusException.class)
+    public ResponseEntity<String> handleInvalidAccountStatus(InvalidAccountStatusException ex) {
+        logger.error("{}",ex.getMessage());
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 
+    @ExceptionHandler(AccountClosedException.class)
+    public ResponseEntity<String> handleAccountClosed(AccountClosedException ex) {
+        logger.error("{}",ex.getMessage());
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+}
