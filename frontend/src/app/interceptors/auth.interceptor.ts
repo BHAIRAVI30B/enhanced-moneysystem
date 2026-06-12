@@ -8,14 +8,19 @@ import {
 import { catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { SessionSocketService } from '../services/sessionsocket.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private sessionSocket: SessionSocketService
+  ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
-    const token = localStorage.getItem('jwt');
+    const token = sessionStorage.getItem('jwt');
     const cloned = token
       ? req.clone({ headers: req.headers.set('Authorization', `Bearer ${token}`) })
       : req;
@@ -23,18 +28,14 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(cloned).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          // Extract the message from the backend response
-          const serverMessage: string =
-            error.error?.message ||
-            'Your session has expired. Please log in again.';
-
-          // Clear local storage without calling logout API
-          // (the session is already dead on the backend side)
+          // 401 here means the JWT has expired (token expiry)
+          // Session kick is handled by WebSocket — not here
+          this.sessionSocket.disconnect();
           this.authService.clearSessionLocally();
-
-          // Navigate to login and pass the message to display to the user
           this.router.navigate(['/login'], {
-            state: { sessionMessage: serverMessage }
+            state: {
+              sessionMessage: 'Your session has expired. Please log in again.'
+            }
           });
         }
         return throwError(() => error);
@@ -42,4 +43,3 @@ export class AuthInterceptor implements HttpInterceptor {
     );
   }
 }
-

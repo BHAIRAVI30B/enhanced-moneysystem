@@ -29,11 +29,11 @@ export class AuthService {
   }
 
   saveToken(token: string): void {
-    localStorage.setItem('jwt', token);
+    sessionStorage.setItem('jwt', token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('jwt');
+    return sessionStorage.getItem('jwt');
   }
 
   isLoggedIn(): boolean {
@@ -44,8 +44,8 @@ export class AuthService {
   logout(): void {
     this.http.post(`${this.baseUrl}/logout`, {}).pipe(
       finalize(() => {
-        localStorage.removeItem('jwt');
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('jwt');
+        sessionStorage.removeItem('user');
         this.router.navigate(['/login']);
       })
     ).subscribe({ error: () => {} }); // finalize always runs even on error
@@ -53,7 +53,7 @@ export class AuthService {
 
   // NEW: used by interceptor when session is killed remotely — skips API call
   clearSessionLocally(): void {
-    localStorage.removeItem('jwt');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('jwt');
+    sessionStorage.removeItem('user');
   }
 }

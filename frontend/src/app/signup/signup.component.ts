@@ -9,52 +9,53 @@ import { UsernameValidator } from '../validators/username-validator';
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RouterLink], 
+  imports: [ReactiveFormsModule, CommonModule, RouterLink],
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.css']
 })
 export class SignupComponent {
   signupForm: FormGroup;
   errorMessage: string | null = null;
+  showPassword: boolean = false; // NEW: password visibility toggle
 
   constructor(
-    private fb: FormBuilder, 
-    private authService: AuthService, 
+    private fb: FormBuilder,
+    private authService: AuthService,
     private router: Router
   ) {
     this.signupForm = this.fb.group({
       username: [
-        '', 
+        '',
         [
-          Validators.required, 
+          Validators.required,
           Validators.minLength(4),
           Validators.maxLength(25),
-          Validators.pattern(/^[a-zA-Z0-9_]+$/) // Only alphanumeric and underscore
+          Validators.pattern(/^[a-zA-Z0-9_]+$/)
         ],
-        [UsernameValidator.checkUsername(this.authService)] // Async validator
+        [UsernameValidator.checkUsername(this.authService)]
       ],
       password: [
-        '', 
+        '',
         [
-          Validators.required, 
+          Validators.required,
           Validators.minLength(8),
           Validators.maxLength(15),
-          Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/) // At least 1 lowercase, 1 uppercase, 1 digit
+          Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/)
         ]
       ],
       holderName: [
-        '', 
+        '',
         [
           Validators.required,
           Validators.minLength(4),
           Validators.maxLength(15),
-          Validators.pattern(/^[a-zA-Z\s]+$/) // Only letters and spaces
+          Validators.pattern(/^[a-zA-Z\s]+$/)
         ]
       ],
       minBalance: [
-        1000, 
+        1000,
         [
-          Validators.required, 
+          Validators.required,
           Validators.min(1000),
           Validators.max(1000000)
         ]
@@ -62,32 +63,23 @@ export class SignupComponent {
     });
   }
 
-  // Helper methods to check validation state
-  get username() {
-    return this.signupForm.get('username');
-  }
+  get username() { return this.signupForm.get('username'); }
+  get password() { return this.signupForm.get('password'); }
+  get holderName() { return this.signupForm.get('holderName'); }
+  get minBalance() { return this.signupForm.get('minBalance'); }
 
-  get password() {
-    return this.signupForm.get('password');
-  }
-
-  get holderName() {
-    return this.signupForm.get('holderName');
-  }
-
-  get minBalance() {
-    return this.signupForm.get('minBalance');
-  }
-
-  // Check if username is being validated (async check in progress)
   get isCheckingUsername(): boolean {
     return this.username?.pending ?? false;
+  }
+
+  // NEW: toggle password visibility
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   onSubmit(): void {
     this.errorMessage = null;
 
-    // Mark all fields as touched to show validation errors
     Object.keys(this.signupForm.controls).forEach(key => {
       this.signupForm.get(key)?.markAsTouched();
     });
@@ -101,7 +93,6 @@ export class SignupComponent {
         },
         error: (err) => {
           console.error('Signup failed', err);
-
           if (typeof err.error === 'string') {
             this.errorMessage = err.error;
           } else if (err.error?.message) {

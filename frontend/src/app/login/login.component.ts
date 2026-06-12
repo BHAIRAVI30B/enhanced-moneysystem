@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { SessionSocketService } from '../services/sessionsocket.service';
 import { LoginRequest } from '../models/login-request.model';
 import { JwtResponse } from '../models/jwt-response.model';
 
@@ -18,7 +19,12 @@ export class LoginComponent implements OnInit {
   errorMessage: string | null = null;
   showPassword: boolean = false;
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private sessionSocket: SessionSocketService
+  ) {
     this.loginForm = this.fb.group({
       username: [
         '',
@@ -41,9 +47,11 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // NEW: show message if redirected here due to a remote session takeover
-    const nav = this.router.getCurrentNavigation();
-    const state = nav?.extras?.state as { sessionMessage?: string } | undefined;
+    // Disconnect any lingering socket when arriving at login page
+    this.sessionSocket.disconnect();
+
+    // Read state from history.state — works even after navigation is complete
+    const state = history.state as { sessionMessage?: string };
     if (state?.sessionMessage) {
       this.errorMessage = state.sessionMessage;
     }
@@ -53,13 +61,8 @@ export class LoginComponent implements OnInit {
     this.showPassword = !this.showPassword;
   }
 
-  get username() {
-    return this.loginForm.get('username');
-  }
-
-  get password() {
-    return this.loginForm.get('password');
-  }
+  get username() { return this.loginForm.get('username'); }
+  get password() { return this.loginForm.get('password'); }
 
   onSubmit(): void {
     this.errorMessage = null;
@@ -70,12 +73,12 @@ export class LoginComponent implements OnInit {
       this.authService.login(request).subscribe({
         next: (response: JwtResponse) => {
           this.authService.saveToken(response.accessToken);
-          localStorage.setItem('user', JSON.stringify(response));
+          sessionStorage.setItem('user', JSON.stringify(response));
+          this.sessionSocket.connect();
           this.router.navigate(['/dashboard']);
         },
         error: (err) => {
           console.error('Login failed', err);
-
           if (typeof err.error === 'string') {
             this.errorMessage = err.error;
           } else if (err.error?.message) {

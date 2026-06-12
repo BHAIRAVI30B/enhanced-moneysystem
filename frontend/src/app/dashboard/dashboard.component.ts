@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { AccountService } from '../services/account.service';
+import { SessionSocketService } from '../services/sessionsocket.service';
 import { Account } from '../models/account.model';
-import { JwtResponse } from '../models/jwt-response.model';
 import { CurrencyPipe, NgIf } from '@angular/common';
 
 @Component({
@@ -21,30 +21,36 @@ export class DashboardComponent implements OnInit {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private sessionSocket: SessionSocketService
   ) {}
 
   ngOnInit(): void {
-    // Retrieve JWT response from localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      const jwtResponse: JwtResponse = JSON.parse(storedUser);
-      this.username = jwtResponse.username;
-      this.role = jwtResponse.roles[0]; // assume single role
+    // Decode username and role directly from the JWT token
+    // This is per-tab safe — each tab has its own JWT in sessionStorage
+    const token = this.authService.getToken();
+    if (!token) {
+      this.router.navigate(['/login']);
+      return;
+    }
 
-      if (this.role === 'ROLE_USER') {
-        // Fetch account details for user
-        this.accountService.getMyDetails().subscribe({
-          next: (acc) => (this.account = acc),
-          error: (err) => console.error('Failed to fetch account details', err)
-        });
-      }
+    // Decode JWT payload (middle part between the two dots)
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    this.username = payload.sub; // subject = username
+    this.role = payload.roles?.[0] ?? '';
+
+    if (this.role === 'ROLE_USER') {
+      // API call uses the Authorization header (JWT) — always correct for this tab
+      this.accountService.getMyDetails().subscribe({
+        next: (acc) => (this.account = acc),
+        error: (err) => console.error('Failed to fetch account details', err)
+      });
     }
   }
 
   logout(): void {
+    this.sessionSocket.disconnect();
     this.authService.logout();
-    localStorage.removeItem('user'); // clear user info
     this.router.navigate(['/login']);
   }
 

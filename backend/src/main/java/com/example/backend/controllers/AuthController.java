@@ -10,6 +10,7 @@ import com.example.backend.entities.Account;
 import com.example.backend.enums.AccountStatus;
 import com.example.backend.exceptions.UsernameAlreadyExistsException;
 import com.example.backend.services.AccountService;
+import com.example.backend.security.websocket.SessionWebSocketHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,12 +40,15 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder encoder;
     private final JwtUtils jwtUtils;
     private final AccountService accountService;
+    private final SessionWebSocketHandler sessionWebSocketHandler;
+
     private static final String ROLE_NOT_FOUND_ERROR = "Error: Role is not found.";
 
     public AuthController(AuthenticationManager authenticationManager,
@@ -52,14 +56,15 @@ public class AuthController {
                           RoleRepository roleRepository,
                           PasswordEncoder encoder,
                           JwtUtils jwtUtils,
-                          AccountService accountService) {
-
+                          AccountService accountService,
+                          SessionWebSocketHandler sessionWebSocketHandler) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
         this.accountService = accountService;
+        this.sessionWebSocketHandler = sessionWebSocketHandler;
     }
 
     @GetMapping("/check-username")
@@ -71,20 +76,23 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
-                        loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        // Generate a fresh sessionId — this silently kills any existing session
+        // Generate fresh sessionId — invalidates existing DB session
         String sessionId = UUID.randomUUID().toString();
 
-        // findByUsername returns UserEntity directly (not Optional) in this repo
         UserEntity user = userRepository.findByUsername(userDetails.getUsername());
         user.setSessionId(sessionId);
         userRepository.save(user);
+
+        // Instantly push "SESSION_KICKED" to all other open WebSocket sessions
+        // of this user and close them — they will redirect to login immediately
+        sessionWebSocketHandler.kickOtherSessions(userDetails.getUsername());
 
         String jwt = jwtUtils.generateJwtToken(authentication, sessionId);
 
@@ -158,14 +166,12 @@ public class AuthController {
         user.setRoles(roles);
         userRepository.save(user);
 
-        return ResponseEntity.ok(
-                new SignupResponse(
-                        user.getId(),
-                        user.getUsername(),
-                        user.getAccount().getAccountId(),
-                        user.getAccount().getHolderName(),
-                        user.getAccount().getBalance()
-                )
-        );
+        return ResponseEntity.ok(new SignupResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getAccount().getAccountId(),
+                user.getAccount().getHolderName(),
+                user.getAccount().getBalance()
+        ));
     }
 }

@@ -11,7 +11,7 @@ export class TransferService {
   constructor(private http: HttpClient) {}
 
   private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('jwt');
+    const token = sessionStorage.getItem('jwt');
     return new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
