@@ -5,7 +5,9 @@ import com.example.backend.dtos.RewardResponse;
 import com.example.backend.dtos.TransactionResponse;
 import com.example.backend.entities.Account;
 import com.example.backend.entities.TransactionLog;
+import com.example.backend.enums.AccountStatus;
 import com.example.backend.enums.TransactionStatus;
+import com.example.backend.exceptions.InvalidAccountStatusException;
 import com.example.backend.repositories.AccountRepository;
 import com.example.backend.exceptions.AccountNotFoundException;
 import org.jspecify.annotations.NonNull;
@@ -116,6 +118,26 @@ public class AccountServiceImpl implements AccountService {
         response.setCreatedOn(transaction.getCreatedOn());
         response.setFailureReason(transaction.getFailureReason());
         return response;
+    }
+
+    @Override
+    public AccountDTO updateStatus(String accountId, String status) {
+        Account account = accountRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new AccountNotFoundException(String.format(ACCOUNT_NOT_FOUND_MSG, accountId)));
+
+        AccountStatus newStatus;
+        try {
+            newStatus = AccountStatus.valueOf(status.trim().toUpperCase());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new InvalidAccountStatusException(
+                    "Invalid account status: " + status + ". Valid values are ACTIVE, LOCKED, CLOSED");
+        }
+
+        account.setStatus(newStatus);
+        account.setLastUpdated(java.time.LocalDateTime.now());
+        accountRepository.save(account);
+
+        return getAccount(accountId);
     }
 
     @Override

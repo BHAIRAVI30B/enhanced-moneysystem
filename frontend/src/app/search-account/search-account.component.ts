@@ -17,6 +17,12 @@ export class SearchAccountComponent {
   loading = false;
   error: string | null = null;
 
+  statusOptions = ['ACTIVE', 'LOCKED', 'CLOSED'];
+  selectedStatus = '';
+  updatingStatus = false;
+  statusUpdateError: string | null = null;
+  statusUpdateSuccess: string | null = null;
+
   constructor(private accountService: AccountService) {}
 
   searchAccount() {
@@ -26,15 +32,41 @@ export class SearchAccountComponent {
     }
     this.loading = true;
     this.error = null;
+    this.statusUpdateError = null;
+    this.statusUpdateSuccess = null;
     this.accountService.getAccountById(this.accountId).subscribe({
       next: (res) => {
         this.account = res;
+        this.selectedStatus = res.status;
         this.loading = false;
       },
       error: () => {
         this.error = 'Account not found';
         this.account = null;
         this.loading = false;
+      }
+    });
+  }
+
+  updateStatus() {
+    if (!this.account || !this.selectedStatus || this.selectedStatus === this.account.status) {
+      return;
+    }
+
+    this.updatingStatus = true;
+    this.statusUpdateError = null;
+    this.statusUpdateSuccess = null;
+
+    this.accountService.updateAccountStatus(this.account.accountId, this.selectedStatus).subscribe({
+      next: (res) => {
+        this.account = res;
+        this.selectedStatus = res.status;
+        this.updatingStatus = false;
+        this.statusUpdateSuccess = `Account status updated to ${res.status}.`;
+      },
+      error: (err) => {
+        this.updatingStatus = false;
+        this.statusUpdateError = (typeof err.error === 'string' && err.error) || 'Failed to update account status.';
       }
     });
   }

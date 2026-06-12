@@ -17,7 +17,10 @@
         </svg>
         <span>Back to Dashboard</span>
       </button>
-      <h2 class="page-title">Search Account</h2>
+      <div class="title-group">
+        <h2 class="page-title">Search Account</h2>
+        <p class="page-subtitle">Look up any account and manage its status</p>
+      </div>
     </div>
   </div>
 
@@ -77,6 +80,29 @@
             <div class="account-name">{{ account.holderName }}</div>
             <div class="account-id">Account #{{ account.accountId }}</div>
           </div>
+        </div>
+
+        <!-- Status Management Card (Admin) -->
+        <div class="status-manage-card">
+          <div class="status-manage-header">
+            <div class="status-manage-title">Manage Account Status</div>
+            <span class="status-badge" [ngClass]="{ 'active': account.status === 'ACTIVE', 'inactive': account.status !== 'ACTIVE' }">
+              Current: {{ account.status }}
+            </span>
+          </div>
+          <div class="status-manage-controls">
+            <select class="status-select" [(ngModel)]="selectedStatus">
+              <option *ngFor="let opt of statusOptions" [value]="opt">{{ opt }}</option>
+            </select>
+            <button
+              class="status-update-btn"
+              [disabled]="updatingStatus || selectedStatus === account.status"
+              (click)="updateStatus()">
+              {{ updatingStatus ? 'Updating...' : 'Update Status' }}
+            </button>
+          </div>
+          <p class="status-update-message success" *ngIf="statusUpdateSuccess">{{ statusUpdateSuccess }}</p>
+          <p class="status-update-message error" *ngIf="statusUpdateError">{{ statusUpdateError }}</p>
         </div>
 
         <!-- Balance Card -->

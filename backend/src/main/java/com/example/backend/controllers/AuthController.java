@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.example.backend.entities.Account;
 import com.example.backend.enums.AccountStatus;
+import com.example.backend.exceptions.AccountClosedException;
 import com.example.backend.exceptions.UsernameAlreadyExistsException;
 import com.example.backend.services.AccountService;
 import com.example.backend.security.websocket.SessionWebSocketHandler;
@@ -83,10 +84,17 @@ public class AuthController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
+        UserEntity user = userRepository.findByUsername(userDetails.getUsername());
+
+        if (user.getAccount() != null && user.getAccount().getStatus() == AccountStatus.CLOSED) {
+            SecurityContextHolder.clearContext();
+            throw new AccountClosedException(
+                    "Your account has been closed. Please open another account.");
+        }
+
         // Generate fresh sessionId — invalidates existing DB session
         String sessionId = UUID.randomUUID().toString();
 
-        UserEntity user = userRepository.findByUsername(userDetails.getUsername());
         user.setSessionId(sessionId);
         userRepository.save(user);
 

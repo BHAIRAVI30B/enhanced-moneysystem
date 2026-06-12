@@ -18,6 +18,7 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   errorMessage: string | null = null;
   showPassword: boolean = false;
+  showClosedAccountModal: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -61,6 +62,10 @@ export class LoginComponent implements OnInit {
     this.showPassword = !this.showPassword;
   }
 
+  closeClosedAccountModal(): void {
+    this.showClosedAccountModal = false;
+  }
+
   get username() { return this.loginForm.get('username'); }
   get password() { return this.loginForm.get('password'); }
 
@@ -79,12 +84,20 @@ export class LoginComponent implements OnInit {
         },
         error: (err) => {
           console.error('Login failed', err);
+          let message: string;
           if (typeof err.error === 'string') {
-            this.errorMessage = err.error;
+            message = err.error;
           } else if (err.error?.message) {
-            this.errorMessage = err.error.message;
+            message = err.error.message;
           } else {
-            this.errorMessage = 'Login failed. Please try again.';
+            message = 'Login failed. Please try again.';
+          }
+
+          if (err.status === 403 && message.toLowerCase().includes('closed')) {
+            this.showClosedAccountModal = true;
+            this.errorMessage = null;
+          } else {
+            this.errorMessage = message;
           }
         }
       });
