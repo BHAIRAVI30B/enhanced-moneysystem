@@ -29,7 +29,6 @@ TABLES = [
             "AMOUNT",
             "CREATED_ON",
             "FAILURE_REASON",
-            "IDEMPOTENCY_KEY",
             "STATUS",
             "FROM_ACCOUNT_ID",
             "TO_ACCOUNT_ID",
@@ -52,8 +51,7 @@ TABLES = [
         "pk": "ID",
         "columns": [
             "ID",
-            "USERNAME",
-            "PASSWORD",
+            "USERNAME",        
             "ACCOUNT_ID",
         ],
     },

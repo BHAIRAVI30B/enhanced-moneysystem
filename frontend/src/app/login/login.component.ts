@@ -95,7 +95,7 @@ export class LoginComponent implements OnInit {
 
           if (err.status === 403 && message.toLowerCase().includes('closed')) {
             this.showClosedAccountModal = true;
-            this.errorMessage = null;
+            this.errorMessage = message;
           } else {
             this.errorMessage = message;
           }
