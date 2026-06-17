@@ -33,18 +33,18 @@ public class WebSecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthEntryPointJwt unauthorizedHandler;
     private final JwtUtils jwtUtils;
-    private final UserRepository userRepository; // NEW
+    private final UserRepository userRepository;
 
     public WebSecurityConfig(
             UserDetailsServiceImpl userDetailsService,
             AuthEntryPointJwt unauthorizedHandler,
             JwtUtils jwtUtils,
-            UserRepository userRepository  // NEW
+            UserRepository userRepository
     ) {
         this.userDetailsService = userDetailsService;
         this.unauthorizedHandler = unauthorizedHandler;
         this.jwtUtils = jwtUtils;
-        this.userRepository = userRepository; // NEW
+        this.userRepository = userRepository;
     }
 
     private static final String[] PUBLIC_ENDPOINTS = {
@@ -59,17 +59,14 @@ public class WebSecurityConfig {
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter(jwtUtils, userRepository); // NEW: pass userRepository
+        return new AuthTokenFilter(jwtUtils, userRepository);
     }
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider =
-                new DaoAuthenticationProvider();
-
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-
         return authProvider;
     }
 
@@ -106,11 +103,13 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/v1/accounts/my-rewards").hasRole(ROLE_USER)
                         .requestMatchers("/api/v1/transfers/user").hasRole(ROLE_USER)
                         .requestMatchers("/api/test/user").hasRole(ROLE_USER)
+                        .requestMatchers("/api/v1/analytics/user/**").hasRole(ROLE_USER)
 
                         // ADMIN endpoints
                         .requestMatchers("/api/v1/transfers/admin").hasRole(ROLE_ADMIN)
                         .requestMatchers("/api/v1/accounts/*").hasRole(ROLE_ADMIN)
                         .requestMatchers("/api/test/admin").hasRole(ROLE_ADMIN)
+                        .requestMatchers("/api/v1/analytics/admin/**").hasRole(ROLE_ADMIN)
 
                         .anyRequest().authenticated()
                 )
