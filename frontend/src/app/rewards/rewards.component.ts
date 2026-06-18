@@ -34,4 +34,8 @@ export class RewardsComponent implements OnInit {
   goBack(): void {
     this.router.navigate(['/dashboard']);
   }
+
+  goTo(path: string): void {
+    this.router.navigate([path]);
+  }
 }

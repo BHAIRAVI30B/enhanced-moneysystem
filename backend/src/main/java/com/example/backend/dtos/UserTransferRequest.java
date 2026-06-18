@@ -10,6 +10,10 @@ public class UserTransferRequest {
 
     private String note;
 
+    // Optional: number of reward points the user wants to redeem against this transfer.
+    // 1 point = ₹1 discount, capped at 10% of the bill amount and at available points.
+    private Integer redeemPoints;
+
     // Getters
     public String getToAccountId() {
         return toAccountId;
@@ -29,6 +33,10 @@ public class UserTransferRequest {
 
     public String getNote() {
         return note;
+    }
+
+    public Integer getRedeemPoints() {
+        return redeemPoints;
     }
 
     // Setters
@@ -51,5 +59,8 @@ public class UserTransferRequest {
     public void setNote(String note) {
         this.note = note;
     }
-}
 
+    public void setRedeemPoints(Integer redeemPoints) {
+        this.redeemPoints = redeemPoints;
+    }
+}

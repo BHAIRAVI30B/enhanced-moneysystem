@@ -78,13 +78,45 @@ public class AccountServiceImpl implements AccountService {
                         String.format(ACCOUNT_NOT_FOUND_MSG, accountId)));
 
         List<RewardResponse.RewardEntry> entries = new ArrayList<>();
+        int totalEarned = computeEarnedPoints(account, entries);
+        int redeemed = account.getRedeemedPoints() != null ? account.getRedeemedPoints() : 0;
+        int available = Math.max(0, totalEarned - redeemed);
+
+        return new RewardResponse(available, entries);
+    }
+
+    @Override
+    public int getAvailablePoints(String accountId) {
+        Account account = accountRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        String.format(ACCOUNT_NOT_FOUND_MSG, accountId)));
+
+        int totalEarned = computeEarnedPoints(account, new ArrayList<>());
+        int redeemed = account.getRedeemedPoints() != null ? account.getRedeemedPoints() : 0;
+        return Math.max(0, totalEarned - redeemed);
+    }
+
+    @Override
+    public void addRedeemedPoints(String accountId, int points) {
+        if (points <= 0) {
+            return;
+        }
+        Account account = accountRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        String.format(ACCOUNT_NOT_FOUND_MSG, accountId)));
+
+        int current = account.getRedeemedPoints() != null ? account.getRedeemedPoints() : 0;
+        account.setRedeemedPoints(current + points);
+        accountRepository.save(account);
+    }
+
+    // Computes total points ever earned by this account from qualifying outgoing transfers.
+    // Eligibility: SUCCESS status, amount > 100, not a self-transfer.
+    // Populates `entries` (if a non-null list is passed) with one entry per qualifying transfer.
+    private int computeEarnedPoints(Account account, List<RewardResponse.RewardEntry> entries) {
         int totalPoints = 0;
 
         for (TransactionLog tx : account.getOutgoingTransactions()) {
-            // Eligibility rules:
-            // 1. Status must be SUCCESS
-            // 2. Amount > 100
-            // 3. Sender and receiver must be different accounts (no self-transfer)
             boolean isSuccess = TransactionStatus.SUCCESS.equals(tx.getStatus());
             boolean isAboveThreshold = tx.getAmount() != null && tx.getAmount() > 100;
             boolean isDifferentUser = !tx.getFromAccount().getAccountId()
@@ -94,17 +126,19 @@ public class AccountServiceImpl implements AccountService {
                 int points = (int) Math.floor(tx.getAmount() / 100); // 1 point per ₹100, rounded down
                 totalPoints += points;
 
-                entries.add(new RewardResponse.RewardEntry(
-                        tx.getToAccount().getHolderName(),
-                        tx.getToAccount().getAccountId(),
-                        tx.getAmount(),
-                        points,
-                        tx.getCreatedOn()
-                ));
+                if (entries != null) {
+                    entries.add(new RewardResponse.RewardEntry(
+                            tx.getToAccount().getHolderName(),
+                            tx.getToAccount().getAccountId(),
+                            tx.getAmount(),
+                            points,
+                            tx.getCreatedOn()
+                    ));
+                }
             }
         }
 
-        return new RewardResponse(totalPoints, entries);
+        return totalPoints;
     }
 
     private static @NonNull TransactionResponse getTransactionResponse(TransactionLog transaction) {

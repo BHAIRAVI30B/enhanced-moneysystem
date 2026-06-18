@@ -33,6 +33,14 @@ public class TransactionLog {
 
     private LocalDateTime createdOn;
 
+    // Reward points redeemed against this transfer (0 if none used)
+    @Column(nullable = false)
+    private Integer pointsRedeemed = 0;
+
+    // ₹ discount applied from redeemed points (1 point = ₹1), 0 if none used
+    @Column(nullable = false)
+    private Double discountAmount = 0.0;
+
     @OneToOne(mappedBy = "transactionLog", cascade = CascadeType.ALL, orphanRemoval = true)
     private TransactionDetails details;
 
@@ -71,6 +79,22 @@ public class TransactionLog {
 
     public TransactionDetails getDetails() {
         return details;
+    }
+
+    public Integer getPointsRedeemed() {
+        return pointsRedeemed;
+    }
+
+    public Double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setPointsRedeemed(Integer pointsRedeemed) {
+        this.pointsRedeemed = pointsRedeemed;
+    }
+
+    public void setDiscountAmount(Double discountAmount) {
+        this.discountAmount = discountAmount;
     }
 
     // Setters
@@ -124,4 +148,3 @@ public class TransactionLog {
                 '}';
     }
 }
-

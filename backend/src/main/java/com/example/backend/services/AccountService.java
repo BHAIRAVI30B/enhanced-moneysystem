@@ -12,4 +12,6 @@ public interface AccountService {
     String generateAccountId();
     RewardResponse getRewards(String accountId); // NEW
     AccountDTO updateStatus(String accountId, String status); // NEW
+    int getAvailablePoints(String accountId); // NEW — total earned minus already redeemed
+    void addRedeemedPoints(String accountId, int points); // NEW — records spent points
 }

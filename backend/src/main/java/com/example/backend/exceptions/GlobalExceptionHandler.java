@@ -82,4 +82,12 @@ public class GlobalExceptionHandler {
         response.put("message", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(InvalidRedemptionException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidRedemption(InvalidRedemptionException ex) {
+        logger.error("{}", ex.getMessage());
+        Map<String, String> response = new HashMap<>();
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 }

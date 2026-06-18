@@ -43,6 +43,16 @@
                 <div class="card-icon-wrapper"><img src="assets/transaction.png" alt="Transactions"></div>
                 <p>Search Transactions</p>
               </div>
+              <div class="card analytics-card" (click)="viewAnalytics()">
+                <div class="card-icon-wrapper analytics-icon-wrapper">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                  </svg>
+                </div>
+                <p>Platform Analytics</p>
+              </div>
             </div>
             <button class="logout-btn" (click)="logout()">
               <svg class="logout-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -52,73 +62,6 @@
               </svg>
               <span>Logout</span>
             </button>
-          </div>
-        </div>
-
-        <!-- Admin Analytics — always visible -->
-        <div class="analytics-section">
-          <div class="analytics-header">
-            <div class="analytics-title-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10"></line>
-                <line x1="12" y1="20" x2="12" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="14"></line>
-              </svg>
-            </div>
-            <h2>Platform Analytics</h2>
-          </div>
-
-          <!-- Error state -->
-          <div class="analytics-error" *ngIf="adminAnalyticsError">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            Unable to load analytics. Check your Snowflake connection.
-          </div>
-
-          <!-- Overall Stats -->
-          <div class="stats-grid" *ngIf="overallStats">
-            <div class="stat-card">
-              <div class="stat-label">Total Volume</div>
-              <div class="stat-value">{{ overallStats.totalVolume | currency:'INR':'symbol':'1.0-0' }}</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Total Transactions</div>
-              <div class="stat-value">{{ overallStats.totalTransactions }}</div>
-            </div>
-            <div class="stat-card success">
-              <div class="stat-label">Successful</div>
-              <div class="stat-value">{{ overallStats.successful }}</div>
-            </div>
-            <div class="stat-card danger">
-              <div class="stat-label">Failed</div>
-              <div class="stat-value">{{ overallStats.failed }}</div>
-            </div>
-          </div>
-
-          <!-- Skeleton loaders while loading -->
-          <div class="stats-grid" *ngIf="!overallStats && !adminAnalyticsError">
-            <div class="stat-card skeleton" *ngFor="let i of [1,2,3,4]"></div>
-          </div>
-
-          <!-- Charts -->
-          <div class="charts-grid">
-            <div class="chart-card">
-              <div class="chart-title">Account Status Breakdown</div>
-              <div class="chart-body">
-                <canvas id="adminStatusChart"></canvas>
-                <div class="chart-loading" *ngIf="!adminStatusBreakdown.length && !adminAnalyticsError">Loading...</div>
-              </div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">Top 5 Accounts by Amount Sent</div>
-              <div class="chart-body">
-                <canvas id="topSendersChart"></canvas>
-                <div class="chart-loading" *ngIf="!topSenders.length && !adminAnalyticsError">Loading...</div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -171,6 +114,16 @@
                 </div>
                 <p>My Rewards</p>
               </div>
+              <div class="card analytics-card" (click)="viewAnalytics()">
+                <div class="card-icon-wrapper analytics-icon-wrapper">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                  </svg>
+                </div>
+                <p>My Analytics</p>
+              </div>
             </div>
             <button class="logout-btn" (click)="logout()">
               <svg class="logout-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -180,63 +133,6 @@
               </svg>
               <span>Logout</span>
             </button>
-          </div>
-        </div>
-
-        <!-- User Analytics — always visible -->
-        <div class="analytics-section">
-          <div class="analytics-header">
-            <div class="analytics-title-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10"></line>
-                <line x1="12" y1="20" x2="12" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="14"></line>
-              </svg>
-            </div>
-            <h2>My Analytics</h2>
-          </div>
-
-          <!-- Error state -->
-          <div class="analytics-error" *ngIf="userAnalyticsError">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            Unable to load analytics. Check your Snowflake connection.
-          </div>
-
-          <!-- Reward points stat -->
-          <div class="stats-grid single">
-            <div class="stat-card rewards-stat">
-              <div class="stat-label">Total Reward Points</div>
-              <div class="stat-value">{{ totalRewardPoints }}</div>
-            </div>
-          </div>
-
-          <!-- Charts -->
-          <div class="charts-grid three-col">
-            <div class="chart-card">
-              <div class="chart-title">Sent vs Received</div>
-              <div class="chart-body">
-                <canvas id="sentVsReceivedChart"></canvas>
-                <div class="chart-loading" *ngIf="!sentVsReceived && !userAnalyticsError">Loading...</div>
-              </div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">Transaction Status</div>
-              <div class="chart-body">
-                <canvas id="userStatusChart"></canvas>
-                <div class="chart-loading" *ngIf="!userStatusBreakdown.length && !userAnalyticsError">Loading...</div>
-              </div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">Reward Points per Transfer</div>
-              <div class="chart-body">
-                <canvas id="rewardPointsChart"></canvas>
-                <div class="chart-loading" *ngIf="!rewardPoints.length && !userAnalyticsError">Loading...</div>
-              </div>
-            </div>
           </div>
         </div>
 

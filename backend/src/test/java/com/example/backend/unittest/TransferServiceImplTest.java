@@ -66,7 +66,7 @@ class TransferServiceImplTest {
         when(transactionLogRepository.save(any(TransactionLog.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        TransactionResponse response = transferService.transfer(fromId, toId, amount, idempotencyKey, category, note);
+        TransactionResponse response = transferService.transfer(fromId, toId, amount, idempotencyKey, category, note, null);
 
         // Assert
         assertEquals("SUCCESS", response.getStatus());
@@ -93,7 +93,7 @@ class TransferServiceImplTest {
 
         // Act & Assert
         assertThrows(AccountNotFoundException.class, () ->
-                transferService.transfer(fromId, toId, amount, idempotencyKey, category, note));
+                transferService.transfer(fromId, toId, amount, idempotencyKey, category, note, null));
     }
 
     @Test
@@ -114,7 +114,7 @@ class TransferServiceImplTest {
 
         // Act & Assert
         assertThrows(AccountNotFoundException.class, () ->
-                transferService.transfer(fromId, toId, amount, idempotencyKey, category, note));
+                transferService.transfer(fromId, toId, amount, idempotencyKey, category, note, null));
     }
 
     @Test
@@ -138,10 +138,10 @@ class TransferServiceImplTest {
         when(accountRepository.findByAccountId(fromId)).thenReturn(Optional.of(fromAccount));
         when(accountRepository.findByAccountId(toId)).thenReturn(Optional.of(toAccount));
 
-        TransactionResponse response = transferService.transfer(fromId, toId, amount, idempotencyKey, category, note);
+        TransactionResponse response = transferService.transfer(fromId, toId, amount, idempotencyKey, category, note, null);
         assertEquals("FAILED", response.getStatus());
     }
-    
+
     @Test
     void testTransfer_insufficientBalance() {
         // Arrange
@@ -166,13 +166,13 @@ class TransferServiceImplTest {
         when(transactionLogRepository.findByIdempotencyKey(idempotencyKey)).thenReturn(null);
 
         // Act
-        TransactionResponse response = transferService.transfer(fromId, toId, amount, idempotencyKey, category, note);
+        TransactionResponse response = transferService.transfer(fromId, toId, amount, idempotencyKey, category, note, null);
 
         // Assert: service catches InsufficientBalanceException and marks FAILED
         assertEquals("FAILED", response.getStatus());
         verify(transactionLogRepository, times(1)).save(any(TransactionLog.class));
     }
-    
+
     @Test
     void testTransfer_duplicateKey() {
         // Arrange
@@ -198,7 +198,7 @@ class TransferServiceImplTest {
 
         // Act & Assert: validateIdempotency now throws DuplicateTransferException
         assertThrows(DuplicateTransferException.class,
-                () -> transferService.transfer(fromId, toId, amount, idempotencyKey, category, note));
+                () -> transferService.transfer(fromId, toId, amount, idempotencyKey, category, note, null));
     }
 
     @Test
@@ -225,7 +225,7 @@ class TransferServiceImplTest {
         when(transactionLogRepository.save(any(TransactionLog.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        TransactionResponse response = transferService.transfer(fromId, toId, amount, idempotencyKey, null, "note");
+        TransactionResponse response = transferService.transfer(fromId, toId, amount, idempotencyKey, null, "note", null);
 
         // Assert
         assertEquals("SUCCESS", response.getStatus());
@@ -256,11 +256,10 @@ class TransferServiceImplTest {
         when(transactionLogRepository.save(any(TransactionLog.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        TransactionResponse response = transferService.transfer(fromId, toId, amount, idempotencyKey, "not-a-real-category", "note");
+        TransactionResponse response = transferService.transfer(fromId, toId, amount, idempotencyKey, "not-a-real-category", "note", null);
 
         // Assert
         assertEquals("SUCCESS", response.getStatus());
         assertEquals(TransactionCategory.OTHER.name(), response.getCategory());
     }
 }
-

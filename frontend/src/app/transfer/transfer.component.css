@@ -1271,3 +1271,182 @@ html {
 .modal-btn.primary:hover {
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
 }
+
+/* Reward Points Redemption */
+.reward-redemption {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.25);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+
+.reward-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.reward-toggle-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9375rem;
+  color: #78350f;
+}
+
+.reward-icon {
+  display: flex;
+  color: #b45309;
+}
+
+.reward-toggle-info strong {
+  color: #92400e;
+}
+
+.reward-no-points {
+  margin: 10px 0 0;
+  font-size: 0.8125rem;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.reward-cap-note {
+  margin-top: 10px;
+  font-size: 0.8125rem;
+  color: #78350f;
+  line-height: 1.5;
+}
+
+.reward-input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.reward-input-row label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #78350f;
+  white-space: nowrap;
+}
+
+.reward-input-row input {
+  width: 110px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 2px solid rgba(245, 158, 11, 0.4);
+  background: white;
+  font-size: 0.9375rem;
+  color: #0f172a;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', -apple-system, sans-serif;
+}
+
+.reward-input-row input:focus {
+  outline: none;
+  border-color: #d97706;
+  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.12);
+}
+
+.reward-max-hint {
+  font-size: 0.8125rem;
+  color: #92400e;
+}
+
+.reward-breakdown {
+  margin-top: 16px;
+  background: white;
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #334155;
+  padding: 4px 0;
+}
+
+.breakdown-row.discount {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.breakdown-row.total {
+  border-top: 1px dashed #e2e8f0;
+  margin-top: 6px;
+  padding-top: 10px;
+  font-weight: 800;
+  color: #0f172a;
+  font-size: 0.9375rem;
+}
+
+.breakdown-note {
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #cbd5e1;
+  transition: 0.25s;
+  border-radius: 26px;
+}
+
+.switch .slider::before {
+  position: absolute;
+  content: '';
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.25s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.switch input:checked + .slider {
+  background-color: #d97706;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+/* Receipt: reward applied note */
+.reward-applied {
+  margin-top: 10px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #92400e;
+  background: rgba(245, 158, 11, 0.12);
+  border-radius: 10px;
+  padding: 6px 14px;
+  display: inline-block;
+}

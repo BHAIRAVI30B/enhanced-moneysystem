@@ -26,7 +26,7 @@ public class TransactionController {
     public ResponseEntity<TransactionResponse> transferAsUser(
             @RequestBody UserTransferRequest request
     ) throws AccountNotFoundException, AccountNotActiveException,
-            InsufficientBalanceException, DuplicateTransferException {
+            InsufficientBalanceException, DuplicateTransferException, InvalidRedemptionException {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String fromAccountId = userDetails.getAccountId(); // always user's own account
@@ -37,7 +37,8 @@ public class TransactionController {
                 request.getAmount(),
                 request.getIdempotencyKey(),
                 request.getCategory(),
-                request.getNote()
+                request.getNote(),
+                request.getRedeemPoints()
         );
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }

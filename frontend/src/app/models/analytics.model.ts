@@ -8,11 +8,10 @@ export interface StatusCount {
   count: number;
 }
 
-export interface RewardPoint {
-  receiver: string;
-  amount: number;
-  points: number;
+export interface DailyFlow {
   date: string;
+  expenditure: number;
+  income: number;
 }
 
 export interface OverallStats {
@@ -27,4 +26,10 @@ export interface TopSender {
   accountId: string;
   totalSent: number;
   transactionCount: number;
+}
+
+export interface CategoryCount {
+  category: string;
+  count: number;
+  totalAmount: number;
 }
