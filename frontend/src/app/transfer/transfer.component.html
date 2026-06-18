@@ -141,6 +141,62 @@
             <span>Amount may have no more than 2 decimal places</span>
           </div>
         </div>
+
+        <!-- Reward Points Redemption (optional) -->
+        <div class="reward-redemption" *ngIf="rewardsLoaded">
+          <div class="reward-toggle-row">
+            <div class="reward-toggle-info">
+              <span class="reward-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="6"></circle>
+                  <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path>
+                </svg>
+              </span>
+              <span>Use Reward Points <strong>({{ availablePoints }} available)</strong></span>
+            </div>
+            <label class="switch" *ngIf="availablePoints > 0">
+              <input type="checkbox" [checked]="useRewardPoints" (change)="toggleUseRewardPoints()">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <p class="reward-no-points" *ngIf="availablePoints === 0">
+            You don't have any reward points to redeem yet. Earn points by transferring over ₹100 to other users.
+          </p>
+
+          <div class="reward-cap-note" *ngIf="availablePoints > 0">
+            Up to <strong>10% of the bill amount</strong> can be covered using points (1 point = ₹1), capped at your available balance.
+          </div>
+
+          <div class="reward-input-row" *ngIf="useRewardPoints && availablePoints > 0">
+            <label for="redeemPointsInput">Points to redeem</label>
+            <input
+              id="redeemPointsInput"
+              type="number"
+              [value]="redeemPoints.value"
+              [max]="maxRedeemablePoints"
+              min="0"
+              (input)="onRedeemPointsInput($event)"
+            />
+            <span class="reward-max-hint">Max for this bill: {{ maxRedeemablePoints }} pts</span>
+          </div>
+
+          <div class="reward-breakdown" *ngIf="useRewardPoints && discountAmount > 0">
+            <div class="breakdown-row">
+              <span>Bill Amount</span>
+              <span>₹{{ amount.value | number:'1.2-2' }}</span>
+            </div>
+            <div class="breakdown-row discount">
+              <span>Reward Discount ({{ redeemPoints.value }} pts)</span>
+              <span>− ₹{{ discountAmount | number:'1.2-2' }}</span>
+            </div>
+            <div class="breakdown-row total">
+              <span>You'll Pay</span>
+              <span>₹{{ amountToPay | number:'1.2-2' }}</span>
+            </div>
+            <div class="breakdown-note">The receiver still gets the full ₹{{ amount.value | number:'1.2-2' }} — your points cover the difference.</div>
+          </div>
+        </div>
     
         <!-- Category -->
         <div class="form-group" [ngClass]="{ 'has-error': isControlInvalid('category') }">
@@ -263,6 +319,9 @@
       <div class="amount-display" [ngClass]="{ 'failed-amount': receiptData.status === 'FAILED' }">
         <div class="amount-label">{{ receiptData.status === 'SUCCESS' ? 'Amount Transferred' : 'Amount Attempted' }}</div>
         <div class="amount-value">₹{{ receiptData.amount | number : '1.2-2' }}</div>
+        <div class="reward-applied" *ngIf="receiptData.status === 'SUCCESS' && receiptData.pointsRedeemed && receiptData.pointsRedeemed > 0">
+          {{ receiptData.pointsRedeemed }} reward points redeemed · You paid ₹{{ receiptData.amountPaid | number:'1.2-2' }}
+        </div>
       </div>
 
       <div class="receipt-body">

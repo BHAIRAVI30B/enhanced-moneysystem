@@ -4,4 +4,5 @@ export interface TransferRequest {
   category?: string;
   note?: string;
   idempotencyKey: string;
+  redeemPoints?: number;
 }

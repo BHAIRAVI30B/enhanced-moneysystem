@@ -1,0 +1,144 @@
+<div class="page-wrapper">
+  <!-- Application Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <h1>FinSwift</h1>
+      <p>Fast and secure financing</p>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-content">
+      <button class="back-btn" (click)="back()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back to Dashboard</span>
+      </button>
+      <div class="title-group">
+        <h2 class="page-title" *ngIf="role === 'ROLE_USER'">My Analytics</h2>
+        <h2 class="page-title" *ngIf="role === 'ROLE_ADMIN'">Platform Analytics</h2>
+        <p class="page-subtitle" *ngIf="role === 'ROLE_USER'">View your transaction insights and analytics</p>
+        <p class="page-subtitle" *ngIf="role === 'ROLE_ADMIN'">Monitor platform activity and user statistics</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="analytics-container">
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Loading analytics...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-container" *ngIf="analyticsError && !isLoading">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <h2>Unable to load analytics</h2>
+      <p>Please check your connection and try again.</p>
+      <button (click)="back()" class="retry-btn">Back to Dashboard</button>
+    </div>
+
+    <!-- User Analytics -->
+    <div class="analytics-content" *ngIf="role === 'ROLE_USER' && !isLoading && !analyticsError">
+      <div class="charts-grid three-col">
+        <div class="chart-card">
+          <div class="chart-title">Sent vs Received (Today)</div>
+          <div class="chart-body">
+            <canvas id="sentVsReceivedChart"></canvas>
+            <div class="chart-empty" *ngIf="!sentVsReceivedToday">No data available</div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title-row">
+            <div class="chart-title">Transaction Status</div>
+            <div class="range-filter">
+              <button
+                *ngFor="let r of statusRangeOptions"
+                type="button"
+                class="range-btn"
+                [class.active]="statusRange === r"
+                (click)="onStatusRangeChange(r)">
+                {{ r === 'day' ? 'Day' : r === 'week' ? 'Week' : 'Month' }}
+              </button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <canvas id="userStatusChart"></canvas>
+            <div class="chart-empty" *ngIf="userAnalyticsLoading">Loading...</div>
+            <div class="chart-empty" *ngIf="!userAnalyticsLoading && !userStatusBreakdown.length">No transactions done {{ statusRange }}</div>
+          </div>
+        </div>
+
+        <div class="chart-card wide">
+          <div class="chart-title">Expenditure vs Income (Last 7 Days)</div>
+          <div class="chart-body">
+            <canvas id="weeklyFlowChart"></canvas>
+            <div class="chart-empty" *ngIf="!weeklyFlow.length">No data available</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Analytics -->
+    <div class="analytics-content" *ngIf="role === 'ROLE_ADMIN' && !isLoading && !analyticsError">
+      <!-- Overall Stats Cards -->
+      <div class="stats-grid" *ngIf="overallStats">
+        <div class="stat-card">
+          <div class="stat-label">Total Volume</div>
+          <div class="stat-value">{{ overallStats.totalVolume | currency:'INR':'symbol':'1.0-0' }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Transactions</div>
+          <div class="stat-value">{{ overallStats.totalTransactions }}</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-label">Successful</div>
+          <div class="stat-value">{{ overallStats.successful }}</div>
+        </div>
+        <div class="stat-card danger">
+          <div class="stat-label">Failed</div>
+          <div class="stat-value">{{ overallStats.failed }}</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">Account Status Breakdown</div>
+          <div class="chart-body">
+            <canvas id="adminStatusChart"></canvas>
+            <div class="chart-empty" *ngIf="!adminStatusBreakdown.length && !analyticsError">No data available</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Top 5 Spenders</div>
+          <div class="chart-body">
+            <canvas id="topSendersChart"></canvas>
+            <div class="chart-empty" *ngIf="!topSenders.length && !analyticsError">No data available</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Spending by Category (Successful)</div>
+          <div class="chart-body">
+            <canvas id="categoryBreakdownChart"></canvas>
+            <div class="chart-empty" *ngIf="!categoryBreakdown.length && !analyticsError">No data available</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>&copy; 2026 FinSwift. All rights reserved.</p>
+  </footer>
+</div>

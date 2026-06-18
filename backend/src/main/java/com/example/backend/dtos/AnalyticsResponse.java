@@ -35,24 +35,21 @@ public class AnalyticsResponse {
         public long getCount() { return count; }
     }
 
-    // Chart 3: Reward points per transaction (bar)
-    public static class RewardPoint {
-        private String receiver;
-        private double amount;
-        private int points;
+    // Chart 3: Expenditure vs Income, date-wise (line chart, weekly)
+    public static class DailyFlow {
         private String date;
+        private double expenditure;
+        private double income;
 
-        public RewardPoint(String receiver, double amount, int points, String date) {
-            this.receiver = receiver;
-            this.amount = amount;
-            this.points = points;
+        public DailyFlow(String date, double expenditure, double income) {
             this.date = date;
+            this.expenditure = expenditure;
+            this.income = income;
         }
 
-        public String getReceiver() { return receiver; }
-        public double getAmount() { return amount; }
-        public int getPoints() { return points; }
         public String getDate() { return date; }
+        public double getExpenditure() { return expenditure; }
+        public double getIncome() { return income; }
     }
 
     // ── ADMIN ANALYTICS ─────────────────────────────────────────
@@ -98,5 +95,22 @@ public class AnalyticsResponse {
         public String getAccountId() { return accountId; }
         public double getTotalSent() { return totalSent; }
         public long getTransactionCount() { return transactionCount; }
+    }
+
+    // Chart 7: Category breakdown (admin — successful transactions only)
+    public static class CategoryCount {
+        private String category;
+        private long count;
+        private double totalAmount;
+
+        public CategoryCount(String category, long count, double totalAmount) {
+            this.category = category;
+            this.count = count;
+            this.totalAmount = totalAmount;
+        }
+
+        public String getCategory() { return category; }
+        public long getCount() { return count; }
+        public double getTotalAmount() { return totalAmount; }
     }
 }

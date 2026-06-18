@@ -12,6 +12,8 @@ interface UiCategoryOption {
   label: string;
 }
 
+const MAX_REDEMPTION_PERCENT = 0.10; // must mirror backend cap
+
 @Component({
   selector: 'app-transfer-money',
   standalone: true,
@@ -33,6 +35,11 @@ export class TransferComponent implements OnInit, OnDestroy {
   accountLocked = false;
   showLockedModal = false;
 
+  // ── Reward redemption state ──────────────────────────────────
+  availablePoints = 0;
+  rewardsLoaded = false;
+  useRewardPoints = false;
+
   categories: UiCategoryOption[] = [
     { value: 'GROCERY', label: 'Grocery' },
     { value: 'STATIONERY', label: 'Stationery' },
@@ -49,6 +56,7 @@ export class TransferComponent implements OnInit, OnDestroy {
       amount: [null, [Validators.required, Validators.min(0.01), this.amountPrecisionValidator]],
       category: ['RENT', [Validators.required]],
       note: ['', [Validators.maxLength(300)]],
+      redeemPoints: [0],
     });
   }
 
@@ -64,10 +72,73 @@ export class TransferComponent implements OnInit, OnDestroy {
         // Silently ignore - status check is a soft safeguard only
       }
     });
+
+    this.accountService.getMyRewards().subscribe({
+      next: (data) => {
+        this.availablePoints = data.totalPoints;
+        this.rewardsLoaded = true;
+      },
+      error: () => {
+        // Soft-fail: redemption section just won't show a usable balance
+        this.rewardsLoaded = true;
+      }
+    });
   }
 
   closeLockedModal(): void {
     this.showLockedModal = false;
+  }
+
+  // ── Reward redemption helpers ────────────────────────────────
+
+  // Max points redeemable for the amount currently typed in: capped at both
+  // 10% of the bill and the user's available point balance.
+  get maxRedeemablePoints(): number {
+    const amt = Number(this.amount.value) || 0;
+    if (amt <= 0) return 0;
+    const capByBill = Math.floor(amt * MAX_REDEMPTION_PERCENT);
+    return Math.max(0, Math.min(capByBill, this.availablePoints));
+  }
+
+  get redeemPoints() { return this.form.get('redeemPoints')!; }
+
+  get discountAmount(): number {
+    return Number(this.redeemPoints.value) || 0; // 1 point = ₹1
+  }
+
+  get amountToPay(): number {
+    const amt = Number(this.amount.value) || 0;
+    return Math.max(0, amt - (this.useRewardPoints ? this.discountAmount : 0));
+  }
+
+  toggleUseRewardPoints(): void {
+    this.useRewardPoints = !this.useRewardPoints;
+    if (!this.useRewardPoints) {
+      this.redeemPoints.setValue(0);
+    } else {
+      // Default to the max allowed when first enabling, user can dial it down
+      this.redeemPoints.setValue(this.maxRedeemablePoints);
+    }
+  }
+
+  // Re-clamp whenever the amount changes, so a previously valid redemption
+  // doesn't silently exceed the new 10% cap.
+  onAmountChange(): void {
+    if (this.useRewardPoints) {
+      const max = this.maxRedeemablePoints;
+      if (Number(this.redeemPoints.value) > max) {
+        this.redeemPoints.setValue(max);
+      }
+    }
+  }
+
+  onRedeemPointsInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = Number(input.value) || 0;
+    const max = this.maxRedeemablePoints;
+    if (value > max) value = max;
+    if (value < 0) value = 0;
+    this.redeemPoints.setValue(Math.floor(value));
   }
 
   // Custom validator for account ID format (ACC followed by 4 digits)
@@ -96,16 +167,15 @@ export class TransferComponent implements OnInit, OnDestroy {
 
   onAmountInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (!input.value.includes('.')) {
-      return;
+    if (input.value.includes('.')) {
+      const [whole, fraction] = input.value.split('.');
+      if (fraction.length > 2) {
+        const truncated = `${whole}.${fraction.slice(0, 2)}`;
+        input.value = truncated;
+        this.form.get('amount')?.setValue(Number(truncated), { emitEvent: false });
+      }
     }
-
-    const [whole, fraction] = input.value.split('.');
-    if (fraction.length > 2) {
-      const truncated = `${whole}.${fraction.slice(0, 2)}`;
-      input.value = truncated;
-      this.form.get('amount')?.setValue(Number(truncated), { emitEvent: false });
-    }
+    this.onAmountChange();
   }
 
   goBack(): void {
@@ -149,6 +219,7 @@ export class TransferComponent implements OnInit, OnDestroy {
       category: this.category.value,
       note: this.note.value,
       idempotencyKey: this.generateIdempotencyKey(),
+      redeemPoints: this.useRewardPoints ? (Number(this.redeemPoints.value) || 0) : 0,
     };
 
     this.transferService.transferAsUser(body).subscribe({
@@ -156,7 +227,13 @@ export class TransferComponent implements OnInit, OnDestroy {
         this.submitting = false;
         this.receiptData = res;
         this.showReceiptWithCountdown(10);
-        this.form.reset({ toAccountId: '', amount: null, category: 'RENT', note: '' });
+        this.form.reset({ toAccountId: '', amount: null, category: 'RENT', note: '', redeemPoints: 0 });
+        this.useRewardPoints = false;
+        // Refresh available points since some may have just been spent
+        this.accountService.getMyRewards().subscribe({
+          next: (data) => { this.availablePoints = data.totalPoints; },
+          error: () => {}
+        });
       },
       error: (err: HttpErrorResponse) => {
         this.submitting = false;

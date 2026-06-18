@@ -10,8 +10,8 @@ public interface TransferService {
                                  Double amount,
                                  String idempotencyKey,
                                  String category,
-                                 String note)
+                                 String note,
+                                 Integer redeemPoints)
             throws AccountNotFoundException, AccountNotActiveException,
-            InsufficientBalanceException, DuplicateTransferException;
+            InsufficientBalanceException, DuplicateTransferException, InvalidRedemptionException;
 }
-

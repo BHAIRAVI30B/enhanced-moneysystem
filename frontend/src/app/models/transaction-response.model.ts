@@ -9,4 +9,7 @@ export interface TransactionResponse {
   category?: string | null;
   note?: string | null;
   createdOn: string;
+  pointsRedeemed?: number;
+  discountAmount?: number;
+  amountPaid?: number;
 }

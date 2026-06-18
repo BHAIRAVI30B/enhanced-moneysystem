@@ -25,24 +25,25 @@ public class AnalyticsController {
     // ── USER ENDPOINTS ───────────────────────────────────────────
 
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/user/sent-vs-received")
-    public ResponseEntity<AnalyticsResponse.SentVsReceived> getSentVsReceived() {
+    @GetMapping("/user/sent-vs-received-today")
+    public ResponseEntity<AnalyticsResponse.SentVsReceived> getSentVsReceivedToday() {
         String accountId = getCurrentUser().getAccountId();
-        return ResponseEntity.ok(analyticsService.getSentVsReceived(accountId));
+        return ResponseEntity.ok(analyticsService.getSentVsReceivedToday(accountId));
     }
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/user/status-breakdown")
-    public ResponseEntity<List<AnalyticsResponse.StatusCount>> getUserStatusBreakdown() {
+    public ResponseEntity<List<AnalyticsResponse.StatusCount>> getUserStatusBreakdown(
+            @RequestParam(name = "range", defaultValue = "day") String range) {
         String accountId = getCurrentUser().getAccountId();
-        return ResponseEntity.ok(analyticsService.getUserStatusBreakdown(accountId));
+        return ResponseEntity.ok(analyticsService.getUserStatusBreakdown(accountId, range));
     }
 
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/user/reward-points")
-    public ResponseEntity<List<AnalyticsResponse.RewardPoint>> getRewardPoints() {
+    @GetMapping("/user/weekly-flow")
+    public ResponseEntity<List<AnalyticsResponse.DailyFlow>> getWeeklyExpenditureVsIncome() {
         String accountId = getCurrentUser().getAccountId();
-        return ResponseEntity.ok(analyticsService.getRewardPoints(accountId));
+        return ResponseEntity.ok(analyticsService.getWeeklyExpenditureVsIncome(accountId));
     }
 
     // ── ADMIN ENDPOINTS ──────────────────────────────────────────
@@ -63,6 +64,12 @@ public class AnalyticsController {
     @GetMapping("/admin/top-senders")
     public ResponseEntity<List<AnalyticsResponse.TopSender>> getTopSenders() {
         return ResponseEntity.ok(analyticsService.getTopSenders());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/category-breakdown")
+    public ResponseEntity<List<AnalyticsResponse.CategoryCount>> getCategoryBreakdown() {
+        return ResponseEntity.ok(analyticsService.getCategoryBreakdown());
     }
 
     private UserDetailsImpl getCurrentUser() {

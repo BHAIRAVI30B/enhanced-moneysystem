@@ -15,6 +15,11 @@ public class TransactionResponse {
     private String note;
     private LocalDateTime createdOn;
 
+    // Reward redemption breakdown (0 / null-safe defaults when not used)
+    private Integer pointsRedeemed = 0;
+    private Double discountAmount = 0.0;
+    private Double amountPaid; // amount actually debited from sender = amount - discountAmount
+
     // Getters
     public String getFromAccountId() {
         return fromAccountId;
@@ -56,6 +61,18 @@ public class TransactionResponse {
         return createdOn;
     }
 
+    public Integer getPointsRedeemed() {
+        return pointsRedeemed;
+    }
+
+    public Double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public Double getAmountPaid() {
+        return amountPaid;
+    }
+
     // Setters
     public void setFromAccountId(String fromAccountId) {
         this.fromAccountId = fromAccountId;
@@ -95,6 +112,18 @@ public class TransactionResponse {
 
     public void setCreatedOn(LocalDateTime createdOn) {
         this.createdOn = createdOn;
+    }
+
+    public void setPointsRedeemed(Integer pointsRedeemed) {
+        this.pointsRedeemed = pointsRedeemed;
+    }
+
+    public void setDiscountAmount(Double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public void setAmountPaid(Double amountPaid) {
+        this.amountPaid = amountPaid;
     }
 
     @Override

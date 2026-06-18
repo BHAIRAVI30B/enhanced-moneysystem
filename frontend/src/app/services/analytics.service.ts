@@ -4,9 +4,10 @@ import { Observable } from 'rxjs';
 import {
   SentVsReceived,
   StatusCount,
-  RewardPoint,
+  DailyFlow,
   OverallStats,
-  TopSender
+  TopSender,
+  CategoryCount
 } from '../models/analytics.model';
 
 @Injectable({ providedIn: 'root' })
@@ -16,16 +17,18 @@ export class AnalyticsService {
   constructor(private http: HttpClient) {}
 
   // User analytics
-  getSentVsReceived(): Observable<SentVsReceived> {
-    return this.http.get<SentVsReceived>(`${this.baseUrl}/user/sent-vs-received`);
+  getSentVsReceivedToday(): Observable<SentVsReceived> {
+    return this.http.get<SentVsReceived>(`${this.baseUrl}/user/sent-vs-received-today`);
   }
 
-  getUserStatusBreakdown(): Observable<StatusCount[]> {
-    return this.http.get<StatusCount[]>(`${this.baseUrl}/user/status-breakdown`);
+  getUserStatusBreakdown(range: 'day' | 'week' | 'month' = 'day'): Observable<StatusCount[]> {
+    return this.http.get<StatusCount[]>(`${this.baseUrl}/user/status-breakdown`, {
+      params: { range }
+    });
   }
 
-  getRewardPoints(): Observable<RewardPoint[]> {
-    return this.http.get<RewardPoint[]>(`${this.baseUrl}/user/reward-points`);
+  getWeeklyFlow(): Observable<DailyFlow[]> {
+    return this.http.get<DailyFlow[]>(`${this.baseUrl}/user/weekly-flow`);
   }
 
   // Admin analytics
@@ -39,5 +42,9 @@ export class AnalyticsService {
 
   getTopSenders(): Observable<TopSender[]> {
     return this.http.get<TopSender[]>(`${this.baseUrl}/admin/top-senders`);
+  }
+
+  getCategoryBreakdown(): Observable<CategoryCount[]> {
+    return this.http.get<CategoryCount[]>(`${this.baseUrl}/admin/category-breakdown`);
   }
 }

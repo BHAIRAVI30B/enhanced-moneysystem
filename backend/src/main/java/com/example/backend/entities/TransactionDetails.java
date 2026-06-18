@@ -55,4 +55,3 @@ public class TransactionDetails {
         this.transactionLog = transactionLog;
     }
 }
-

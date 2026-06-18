@@ -26,6 +26,11 @@ public class Account {
 
     private LocalDateTime lastUpdated;
 
+    // Running total of reward points already redeemed by this account.
+    // "Available points" = (points earned from qualifying transfers) - redeemedPoints.
+    @Column(nullable = false)
+    private Integer redeemedPoints = 0;
+
     // Outgoing transactions (this account is the sender)
     @OneToMany(mappedBy = "fromAccount", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<TransactionLog> outgoingTransactions;
@@ -63,6 +68,10 @@ public class Account {
         return lastUpdated;
     }
 
+    public Integer getRedeemedPoints() {
+        return redeemedPoints;
+    }
+
     public List<TransactionLog> getOutgoingTransactions() {
         return outgoingTransactions;
     }
@@ -98,6 +107,10 @@ public class Account {
 
     public void setLastUpdated(LocalDateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public void setRedeemedPoints(Integer redeemedPoints) {
+        this.redeemedPoints = redeemedPoints;
     }
 
     public void setOutgoingTransactions(List<TransactionLog> outgoingTransactions) {
