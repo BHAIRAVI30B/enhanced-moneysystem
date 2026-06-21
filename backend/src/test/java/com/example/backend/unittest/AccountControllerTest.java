@@ -171,6 +171,79 @@ class AccountControllerTest {
                 () -> accountController.getMyTransactions());
     }
 
+    @Test
+    void testUpdateAccountStatus_success() {
+        com.example.backend.dtos.AccountStatusUpdateRequest request =
+                new com.example.backend.dtos.AccountStatusUpdateRequest();
+        request.setStatus("LOCKED");
+
+        AccountDTO updated = new AccountDTO();
+        updated.setAccountId("123");
+        updated.setStatus("LOCKED");
+
+        when(accountService.updateStatus("123", "LOCKED")).thenReturn(updated);
+
+        ResponseEntity<AccountDTO> response = accountController.updateAccountStatus("123", request);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals("LOCKED", response.getBody().getStatus());
+    }
+
+    @Test
+    void testUpdateAccountStatus_accountNotFound_propagatesException() {
+        com.example.backend.dtos.AccountStatusUpdateRequest request =
+                new com.example.backend.dtos.AccountStatusUpdateRequest();
+        request.setStatus("LOCKED");
+
+        when(accountService.updateStatus("999", "LOCKED"))
+                .thenThrow(new AccountNotFoundException("Account not found"));
+
+        assertThrows(AccountNotFoundException.class,
+                () -> accountController.updateAccountStatus("999", request));
+    }
+
+    @Test
+    void testUpdateAccountStatus_invalidStatus_propagatesException() {
+        com.example.backend.dtos.AccountStatusUpdateRequest request =
+                new com.example.backend.dtos.AccountStatusUpdateRequest();
+        request.setStatus("NOT_A_STATUS");
+
+        when(accountService.updateStatus("123", "NOT_A_STATUS"))
+                .thenThrow(new com.example.backend.exceptions.InvalidAccountStatusException(
+                        "Invalid account status: NOT_A_STATUS"));
+
+        assertThrows(com.example.backend.exceptions.InvalidAccountStatusException.class,
+                () -> accountController.updateAccountStatus("123", request));
+    }
+
+    @Test
+    void testGetMyRewards_success() {
+        setUserContext("user123");
+
+        com.example.backend.dtos.RewardResponse rewards =
+                new com.example.backend.dtos.RewardResponse(5, java.util.List.of());
+
+        when(accountService.getRewards("user123")).thenReturn(rewards);
+
+        ResponseEntity<com.example.backend.dtos.RewardResponse> response =
+                accountController.getMyRewards();
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(5, response.getBody().getTotalPoints());
+        assertTrue(response.getBody().getEntries().isEmpty());
+    }
+
+    @Test
+    void testGetMyRewards_accountNotFound_propagatesException() {
+        setUserContext("user999");
+
+        when(accountService.getRewards("user999"))
+                .thenThrow(new AccountNotFoundException("Account not found"));
+
+        assertThrows(AccountNotFoundException.class,
+                () -> accountController.getMyRewards());
+    }
+
     private void setUserContext(String accountId) {
 
         UserDetailsImpl userDetails = new UserDetailsImpl(

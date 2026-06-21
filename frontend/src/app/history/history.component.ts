@@ -33,10 +33,14 @@ export class HistoryComponent implements OnInit {
 
         this.accountService.getMyTransactions().subscribe({
           next: (txs) => {
-            this.transactions = txs;
-            this.outgoing = txs.filter(t => t.fromAccountId === this.myAccountId && t.status === 'SUCCESS');
-            this.incoming = txs.filter(t => t.toAccountId === this.myAccountId && t.status === 'SUCCESS');
-            this.failed = txs.filter(t => t.status === 'FAILED');
+            // Most recent first — backend returns oldest-first, so sort here.
+            const sorted = [...txs].sort(
+              (a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime()
+            );
+            this.transactions = sorted;
+            this.outgoing = sorted.filter(t => t.fromAccountId === this.myAccountId && t.status === 'SUCCESS');
+            this.incoming = sorted.filter(t => t.toAccountId === this.myAccountId && t.status === 'SUCCESS');
+            this.failed = sorted.filter(t => t.status === 'FAILED');
           },
           error: (err) => console.error('Failed to fetch transactions', err)
         });

@@ -166,6 +166,7 @@
               <small *ngIf="minBalance?.errors?.['required']">Balance is required</small>
               <small *ngIf="minBalance?.errors?.['min']">Minimum balance must be at least 1000</small>
               <small *ngIf="minBalance?.errors?.['max']">Balance cannot exceed 1,000,000</small>
+              <small *ngIf="minBalance?.errors?.['decimalPlaces']">Only up to 2 decimal places are allowed (e.g. 1000.25)</small>
             </div>
           </div>
 
