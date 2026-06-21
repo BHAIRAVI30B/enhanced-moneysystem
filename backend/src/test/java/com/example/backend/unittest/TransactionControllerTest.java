@@ -137,6 +137,24 @@ class TransactionControllerTest {
                 () -> transactionController.transferAsUser(request));
     }
 
+    @Test
+    void testTransfer_user_invalidRedemption() throws Exception {
+
+        setUserContext();
+
+        UserTransferRequest request = new UserTransferRequest();
+        request.setToAccountId("456");
+        request.setAmount(100.0);
+        request.setIdempotencyKey("key123");
+        request.setRedeemPoints(50); // exceeds whatever the cap/available turns out to be
+
+        when(transferService.transfer("user123", "456", 100.0, "key123", null, null, 50))
+                .thenThrow(new InvalidRedemptionException("You can redeem at most 10 points for this transfer"));
+
+        assertThrows(InvalidRedemptionException.class,
+                () -> transactionController.transferAsUser(request));
+    }
+
     private void setUserContext() {
 
         UserDetailsImpl userDetails = new UserDetailsImpl(

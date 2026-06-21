@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { SignupRequest } from '../models/signup-request.model';
 import { UsernameValidator } from '../validators/username-validator';
+import { DecimalPlacesValidator } from '../validators/decimalplace-validator';
 
 @Component({
   selector: 'app-signup',
@@ -57,7 +58,8 @@ export class SignupComponent {
         [
           Validators.required,
           Validators.min(1000),
-          Validators.max(1000000)
+          Validators.max(1000000),
+          DecimalPlacesValidator.maxDecimalPlaces(2)
         ]
       ]
     });

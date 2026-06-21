@@ -9,6 +9,7 @@ import com.example.backend.enums.AccountStatus;
 import com.example.backend.enums.TransactionStatus;
 import com.example.backend.exceptions.InvalidAccountStatusException;
 import com.example.backend.repositories.AccountRepository;
+import com.example.backend.repositories.TransactionLogRepository;
 import com.example.backend.exceptions.AccountNotFoundException;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
@@ -24,9 +25,12 @@ public class AccountServiceImpl implements AccountService {
     private static final String ACCOUNT_NOT_FOUND_MSG = "Account with id %s not found";
 
     private final AccountRepository accountRepository;
+    private final TransactionLogRepository transactionLogRepository;
 
-    public AccountServiceImpl(AccountRepository accountRepository) {
+    public AccountServiceImpl(AccountRepository accountRepository,
+                              TransactionLogRepository transactionLogRepository) {
         this.accountRepository = accountRepository;
+        this.transactionLogRepository = transactionLogRepository;
     }
 
     @Override
@@ -62,7 +66,13 @@ public class AccountServiceImpl implements AccountService {
 
         List<TransactionLog> allTransactions = new ArrayList<>();
         allTransactions.addAll(account.getOutgoingTransactions());
-        allTransactions.addAll(account.getIncomingTransactions());
+        // Failed transfers never actually moved money, so they should not
+        // appear in the receiver's history — only the sender attempted them.
+        for (TransactionLog tx : account.getIncomingTransactions()) {
+            if (tx.getStatus() != TransactionStatus.FAILED) {
+                allTransactions.add(tx);
+            }
+        }
 
         List<TransactionResponse> transactionResponseList = new ArrayList<>();
         for (TransactionLog transaction : allTransactions) {
@@ -77,8 +87,22 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new AccountNotFoundException(
                         String.format(ACCOUNT_NOT_FOUND_MSG, accountId)));
 
+        List<TransactionLog> eligible = transactionLogRepository.findEligibleRewardTransfers(accountId);
+
         List<RewardResponse.RewardEntry> entries = new ArrayList<>();
-        int totalEarned = computeEarnedPoints(account, entries);
+        int totalEarned = 0;
+        for (TransactionLog tx : eligible) {
+            int points = (int) Math.floor(tx.getAmount() / 100); // 1 point per ₹100, rounded down
+            totalEarned += points;
+            entries.add(new RewardResponse.RewardEntry(
+                    tx.getToAccount().getHolderName(),
+                    tx.getToAccount().getAccountId(),
+                    tx.getAmount(),
+                    points,
+                    tx.getCreatedOn()
+            ));
+        }
+
         int redeemed = account.getRedeemedPoints() != null ? account.getRedeemedPoints() : 0;
         int available = Math.max(0, totalEarned - redeemed);
 
@@ -91,7 +115,9 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new AccountNotFoundException(
                         String.format(ACCOUNT_NOT_FOUND_MSG, accountId)));
 
-        int totalEarned = computeEarnedPoints(account, new ArrayList<>());
+        // Single DB aggregate instead of loading every transaction into memory —
+        // this method runs on every transfer to validate redemption, so it's the hot path.
+        int totalEarned = transactionLogRepository.sumEarnedPoints(accountId);
         int redeemed = account.getRedeemedPoints() != null ? account.getRedeemedPoints() : 0;
         return Math.max(0, totalEarned - redeemed);
     }
@@ -108,37 +134,6 @@ public class AccountServiceImpl implements AccountService {
         int current = account.getRedeemedPoints() != null ? account.getRedeemedPoints() : 0;
         account.setRedeemedPoints(current + points);
         accountRepository.save(account);
-    }
-
-    // Computes total points ever earned by this account from qualifying outgoing transfers.
-    // Eligibility: SUCCESS status, amount > 100, not a self-transfer.
-    // Populates `entries` (if a non-null list is passed) with one entry per qualifying transfer.
-    private int computeEarnedPoints(Account account, List<RewardResponse.RewardEntry> entries) {
-        int totalPoints = 0;
-
-        for (TransactionLog tx : account.getOutgoingTransactions()) {
-            boolean isSuccess = TransactionStatus.SUCCESS.equals(tx.getStatus());
-            boolean isAboveThreshold = tx.getAmount() != null && tx.getAmount() > 100;
-            boolean isDifferentUser = !tx.getFromAccount().getAccountId()
-                    .equals(tx.getToAccount().getAccountId());
-
-            if (isSuccess && isAboveThreshold && isDifferentUser) {
-                int points = (int) Math.floor(tx.getAmount() / 100); // 1 point per ₹100, rounded down
-                totalPoints += points;
-
-                if (entries != null) {
-                    entries.add(new RewardResponse.RewardEntry(
-                            tx.getToAccount().getHolderName(),
-                            tx.getToAccount().getAccountId(),
-                            tx.getAmount(),
-                            points,
-                            tx.getCreatedOn()
-                    ));
-                }
-            }
-        }
-
-        return totalPoints;
     }
 
     private static @NonNull TransactionResponse getTransactionResponse(TransactionLog transaction) {
